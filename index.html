@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro de Trabalho</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    input, button, select { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+    .registro { border-bottom: 1px solid #ccc; padding: 8px 0; }
+    .relatorio { white-space: pre-wrap; background: #f0f0f0; padding: 10px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Registro de Trabalho</h2>
+
+  <label>Data</label>
+  <input type="date" id="data" />
+
+  <label>Função</label>
+  <select id="funcao">
+    <option value="">Selecione</option>
+    <option value="Cleaner">Cleaner</option>
+    <option value="Supervisor">Supervisor</option>
+  </select>
+
+  <label>Horas trabalhadas</label>
+  <input type="number" step="0.1" id="horas" />
+
+  <button onclick="adicionarRegistro()">Adicionar Registro</button>
+
+  <h3>Registros</h3>
+  <div id="listaRegistros"></div>
+
+  <h3>Encerrar Ciclo</h3>
+  <label>Fechamento:</label>
+  <select id="quinzena">
+    <option value="">Selecione</option>
+    <option value="1">1ª quinzena (1 a 15)</option>
+    <option value="2">2ª quinzena (16 a 31)</option>
+  </select>
+  <button onclick="encerrarCiclo()">Gerar Relatório</button>
+
+  <div id="relatorio" class="relatorio" style="display:none;"></div>
+  <button id="btnEnviar" style="display:none;" onclick="enviarEmail()">Enviar para pagamento</button>
+
+  <script>
+    let registros = JSON.parse(localStorage.getItem("registros")) || [];
+    let relatorioAtual = "";
+    let quinzenaAtual = "";
+
+    const valores = {
+      "Cleaner": 13,
+      "Supervisor": 15
+    };
+
+    function salvarRegistros() {
+      localStorage.setItem("registros", JSON.stringify(registros));
+      mostrarRegistros();
+    }
+
+    function adicionarRegistro() {
+      const dataStr = document.getElementById("data").value;
+      const funcao = document.getElementById("funcao").value;
+      const horas = parseFloat(document.getElementById("horas").value);
+
+      if (!dataStr || !funcao || isNaN(horas)) {
+        alert("Preencha todos os campos corretamente!");
+        return;
+      }
+
+      const data = new Date(dataStr);
+      const dia = data.getDate();
+      const valor = valores[funcao];
+
+      registros.push({ dia, funcao, horas, valor, data: dataStr });
+      salvarRegistros();
+
+      document.getElementById("data").value = "";
+      document.getElementById("funcao").value = "";
+      document.getElementById("horas").value = "";
+    }
+
+    function mostrarRegistros() {
+      const div = document.getElementById("listaRegistros");
+      div.innerHTML = "";
+
+      registros.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(r => {
+        const item = document.createElement("div");
+        item.className = "registro";
+        item.textContent = `${r.data} - ${r.funcao} - ${r.horas}h`;
+        div.appendChild(item);
+      });
+    }
+
+    function encerrarCiclo() {
+      const q = document.getElementById("quinzena").value;
+      if (!q) {
+        alert("Selecione uma quinzena.");
+        return;
+      }
+
+      const inicio = q === "1" ? 1 : 16;
+      const fim = q === "1" ? 15 : 31;
+
+      const registrosFiltrados = registros.filter(r => r.dia >= inicio && r.dia <= fim);
+
+      if (registrosFiltrados.length === 0) {
+        alert("Nenhum registro nessa quinzena.");
+        return;
+      }
+
+      let detalhes = `Dias trabalhados:
+`;
+      registrosFiltrados.forEach(r => {
+        detalhes += `${r.data} - ${r.funcao} - ${r.horas}h
+`;
+      });
+
+      let resumo = {};
+      let totalGeral = 0;
+
+      registrosFiltrados.forEach(r => {
+        if (!resumo[r.funcao]) resumo[r.funcao] = { horas: 0, total: 0, valorHora: r.valor };
+        resumo[r.funcao].horas += r.horas;
+        resumo[r.funcao].total += r.horas * r.valor;
+        totalGeral += r.horas * r.valor;
+      });
+
+      let totais = `
+Resumo por função:
+`;
+      for (let funcao in resumo) {
+        const r = resumo[funcao];
+        totais += `${funcao}: ${r.horas}h x R$${r.valorHora.toFixed(2)} = R$${r.total.toFixed(2)}
+`;
+      }
+
+      totais += `
+Total geral: R$${totalGeral.toFixed(2)}`;
+
+      const relatorioFinal = `Relatório de Pagamento - ${q === "1" ? "1ª Quinzena (1-15)" : "2ª Quinzena (16-31)"}
+
+${detalhes}
+${totais}`;
+
+      relatorioAtual = relatorioFinal;
+      quinzenaAtual = q;
+
+      document.getElementById("relatorio").textContent = relatorioFinal;
+      document.getElementById("relatorio").style.display = "block";
+      document.getElementById("btnEnviar").style.display = "inline-block";
+    }
+
+    function enviarEmail() {
+      const email = "cesarlinobit@gmail.com";
+      const assunto = "Solicitação de pagamento";
+      const corpo = encodeURIComponent(relatorioAtual);
+      const mailto = `mailto:${email}?subject=${assunto}&body=${corpo}`;
+      window.location.href = mailto;
+
+      const inicio = quinzenaAtual === "1" ? 1 : 16;
+      const fim = quinzenaAtual === "1" ? 15 : 31;
+      registros = registros.filter(r => !(r.dia >= inicio && r.dia <= fim));
+      salvarRegistros();
+
+      document.getElementById("relatorio").style.display = "none";
+      document.getElementById("btnEnviar").style.display = "none";
+      document.getElementById("quinzena").value = "";
+    }
+
+    mostrarRegistros();
+  </script>
+</body>
+</html>
