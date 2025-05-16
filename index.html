@@ -56,7 +56,12 @@
 
     function salvarRegistros() {
       localStorage.setItem("registros", JSON.stringify(registros));
-      mostrarRegistros();
+      function excluirRegistro(index) {
+      registros.splice(index, 1);
+      salvarRegistros();
+    }
+
+    mostrarRegistros();
     }
 
     function adicionarRegistro() {
@@ -85,10 +90,10 @@
       const div = document.getElementById("listaRegistros");
       div.innerHTML = "";
 
-      registros.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(r => {
+      registros.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach((r, index) => {
         const item = document.createElement("div");
         item.className = "registro";
-        item.textContent = `${r.data} - ${r.funcao} - ${r.horas}h`;
+        item.innerHTML = `${r.data} - ${r.funcao} - ${r.horas}h <button onclick="excluirRegistro(${index})" style="float:right;">Excluir</button>`;
         div.appendChild(item);
       });
     }
@@ -167,6 +172,11 @@ ${totais}`;
       document.getElementById("relatorio").style.display = "none";
       document.getElementById("btnEnviar").style.display = "none";
       document.getElementById("quinzena").value = "";
+    }
+
+    function excluirRegistro(index) {
+      registros.splice(index, 1);
+      salvarRegistros();
     }
 
     mostrarRegistros();
