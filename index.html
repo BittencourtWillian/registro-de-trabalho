@@ -10,6 +10,19 @@
     .registro { border-bottom: 1px solid #ccc; padding: 8px 0; }
     .relatorio { white-space: pre-wrap; background: #f0f0f0; padding: 10px; margin-top: 20px; }
   </style>
+  <script>
+    const APP_VERSION = "1.0.1"; // increment this version with each deploy
+    const storedVersion = localStorage.getItem("app_version");
+
+    if (storedVersion && storedVersion !== APP_VERSION) {
+      if (confirm("Uma nova versão do app está disponível. Deseja atualizar agora?")) {
+        localStorage.setItem("app_version", APP_VERSION);
+        location.reload(true);
+      }
+    } else {
+      localStorage.setItem("app_version", APP_VERSION);
+    }
+  </script>
 </head>
 <body>
   <div style="display: flex; justify-content: space-between; align-items: center;">
