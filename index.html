@@ -8,7 +8,7 @@
   <script defer src="script.js"></script>
 </head>
 <body>
-  <div style="display: flex; justify-content: space-between; align-items: center;">
+  <div class="topo">
     <button onclick="location.reload()" class="btn-atualizar">🔄 Atualizar App</button>
   </div>
 
@@ -47,7 +47,7 @@
     </div>
   </div>
 
-  <button onclick="adicionarRegistro()">Adicionar Registro</button>
+  <button class="btn-principal" onclick="adicionarRegistro()">➕ Adicionar Registro</button>
 
   <h3>Registros</h3>
   <div id="listaRegistros"></div>
@@ -59,9 +59,9 @@
     <option value="1">1ª quinzena (1 a 15)</option>
     <option value="2">2ª quinzena (16 a 31)</option>
   </select>
-  <button onclick="encerrarCiclo()">Gerar Relatório</button>
+  <button class="btn-principal" onclick="encerrarCiclo()">📄 Gerar Relatório</button>
 
   <div id="relatorio" class="relatorio" style="display:none;"></div>
-  <button id="btnEnviar" style="display:none;" onclick="enviarEmail()">Enviar para pagamento</button>
+  <button id="btnEnviar" class="btn-principal" style="display:none;" onclick="enviarEmail()">📤 Enviar para pagamento</button>
 </body>
 </html>

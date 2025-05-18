@@ -56,8 +56,9 @@ function mostrarRegistros() {
     const item = document.createElement("div");
     item.className = "registro";
     item.innerHTML = `
-      <span>${r.data} - ${r.local} - ${r.funcao} - ${r.horas}h</span>
-      <button onclick="excluirRegistro(${index})" style="float:right; background-color:#e74c3c; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:12px;">Excluir</button>
+      <div><strong>${r.data}</strong><br>
+      📍 ${r.local} | 🧹 ${r.funcao} | ⏱️ ${r.horas}h</div>
+      <button onclick="excluirRegistro(${index})">Excluir</button>
     `;
     div.appendChild(item);
   });
