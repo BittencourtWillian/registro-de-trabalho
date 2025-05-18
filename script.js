@@ -1,13 +1,9 @@
-const APP_VERSION = "1.0.4";
+const APP_VERSION = "1.0.5";
 const storedVersion = localStorage.getItem("app_version");
 
-if (storedVersion && storedVersion !== APP_VERSION) {
-  if (confirm("Uma nova versão do app está disponível. Deseja atualizar agora?")) {
-    localStorage.setItem("app_version", APP_VERSION);
-    location.reload(true);
-  }
-} else {
+if (storedVersion !== APP_VERSION) {
   localStorage.setItem("app_version", APP_VERSION);
+  location.reload(true);
 }
 
 let registros = JSON.parse(localStorage.getItem("registros")) || [];
@@ -82,21 +78,20 @@ function encerrarCiclo() {
     return;
   }
 
-  let detalhes = `<b>Dias trabalhados:</b><br><pre style="font-family: monospace;">
-  Data       |   Local      | Função     | Horas
-------------------------------------------------
-`;
+  let tabela = `<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;text-align:left;">
+    <tr><th>Data</th><th>Local</th><th>Função</th><th>Horas</th></tr>`;
 
   registrosFiltrados.forEach(r => {
     const [ano, mes, dia] = r.data.split("-");
-    const dataFormatada = `${dia}/${mes}/${ano}`.padEnd(12);
-    const local = r.local.padEnd(12);
-    const funcao = r.funcao.padEnd(10);
-    const horas = `${r.horas} Horas`;
-    detalhes += `${dataFormatada}| ${local}| ${funcao}| ${horas}\n`;
+    tabela += `<tr>
+      <td>${dia}/${mes}/${ano}</td>
+      <td>${r.local}</td>
+      <td>${r.funcao}</td>
+      <td>${r.horas} Horas</td>
+    </tr>`;
   });
 
-  detalhes += `</pre>`;
+  tabela += `</table>`;
 
   let resumo = {};
   let totalGeral = 0;
@@ -108,7 +103,7 @@ function encerrarCiclo() {
     totalGeral += r.horas * r.valor;
   });
 
-  let totais = `<b>Resumo por função:</b><br>`;
+  let totais = `<br><b>Resumo por função:</b><br>`;
   for (let funcao in resumo) {
     const r = resumo[funcao];
     totais += `${funcao}: ${r.horas}h x €${r.valorHora.toFixed(2)} = €${r.total.toFixed(2)}<br>`;
@@ -116,7 +111,7 @@ function encerrarCiclo() {
 
   totais += `<br><span style="background: yellow; font-weight: bold;">Total geral: €${totalGeral.toFixed(2)}</span>`;
 
-  const relatorioFinal = `Relatório de Pagamento - ${q === "1" ? "1ª Quinzena (1-15)" : "2ª Quinzena (16-31)"}<br><br>${detalhes}${totais}`;
+  const relatorioFinal = `Relatório de Pagamento - ${q === "1" ? "1ª Quinzena (1-15)" : "2ª Quinzena (16-31)"}<br><br>${tabela}${totais}`;
 
   relatorioAtual = relatorioFinal;
   quinzenaAtual = q;
@@ -143,7 +138,7 @@ function confirmarNome() {
 
   const email = "cesarlinobit@gmail.com";
   const assunto = encodeURIComponent(`Solicitação de pagamento: ${nome}`);
-  const corpo = encodeURIComponent(relatorioAtual.replace(/<br>/g, "\n").replace(/<\/?[^>]+(>|$)/g, ""));
+  const corpo = encodeURIComponent(relatorioAtual.replace(/<[^>]+>/g, '').replace(/<br\s*\/?>/gi, '\n'));
   const mailto = `mailto:${email}?subject=${assunto}&body=${corpo}`;
   window.location.href = mailto;
 
