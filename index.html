@@ -8,6 +8,10 @@
   <script defer src="script.js"></script>
 </head>
 <body>
+  <div class="logo">
+    <img src="https://raw.githubusercontent.com/BittencourtWillian/registro-de-trabalho/main/logo.png" alt="Marvel Cleaning Services" />
+  </div>
+
   <div class="topo">
     <button onclick="location.reload()" class="btn-atualizar">🔄 Atualizar App</button>
   </div>
@@ -15,25 +19,6 @@
   <h2>Registro de Trabalho</h2>
 
   <div class="linha-dupla">
-    <div>
-      <label>Data</label>
-      <input type="date" id="data" />
-    </div>
-    <div>
-      <label>Função</label>
-      <select id="funcao">
-        <option value="">Selecione</option>
-        <option value="Cleaner">Cleaner</option>
-        <option value="Supervisor">Supervisor</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="linha-dupla">
-    <div>
-      <label>Horas trabalhadas</label>
-      <input inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="horas" />
-    </div>
     <div>
       <label>Local de Trabalho</label>
       <select id="local">
@@ -45,14 +30,33 @@
         <option value="Navan">Navan</option>
       </select>
     </div>
+    <div>
+      <label>Data</label>
+      <input type="date" id="data" />
+    </div>
+  </div>
+
+  <div class="linha-dupla">
+    <div>
+      <label>Função</label>
+      <select id="funcao">
+        <option value="">Selecione</option>
+        <option value="Cleaner">Cleaner</option>
+        <option value="Supervisor">Supervisor</option>
+      </select>
+    </div>
+    <div>
+      <label>Horas trabalhadas</label>
+      <input inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="horas" />
+    </div>
   </div>
 
   <button class="btn-principal" onclick="adicionarRegistro()">➕ Adicionar Registro</button>
 
-  <h3>Registros</h3>
+  <h3 class="centralizado">Registros</h3>
   <div id="listaRegistros"></div>
 
-  <h3>Encerrar Ciclo</h3>
+  <h3 class="centralizado">Encerrar Ciclo</h3>
   <label>Fechamento:</label>
   <select id="quinzena">
     <option value="">Selecione</option>
@@ -69,7 +73,10 @@
     <div class="modal-content">
       <label for="inputNome">Digite seu nome e sobrenome:</label>
       <input type="text" id="inputNome" placeholder="Ex: João Silva" />
-      <button onclick="confirmarNome()">Confirmar</button>
+      <div class="botoes-modal">
+        <button onclick="confirmarNome()">Confirmar</button>
+        <button onclick="fecharModal()">Retornar</button>
+      </div>
     </div>
   </div>
 </body>
