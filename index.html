@@ -8,10 +8,9 @@
   <script defer src="script.js"></script>
 </head>
 <body>
-
-  <!-- Cabeçalho com logo e título -->
-  <div class="cabecalho-centralizado">
-    <img src="https://raw.githubusercontent.com/BittencourtWillian/registro-de-trabalho/main/logo.png" alt="Marvel Logo" class="logo-titulo"/>
+  <!-- Título com logo ao lado -->
+  <div class="titulo-com-logo">
+    <img src="https://raw.githubusercontent.com/BittencourtWillian/registro-de-trabalho/main/logo.png" alt="Marvel Logo" />
     <h2>Registro de Trabalho</h2>
   </div>
 
@@ -33,7 +32,7 @@
     </select>
   </div>
 
-  <!-- Linha dupla: Data e Função -->
+  <!-- Linha dupla: Data + Função -->
   <div class="linha-dupla">
     <div>
       <label>Data</label>
@@ -49,7 +48,7 @@
     </div>
   </div>
 
-  <!-- Horas trabalhadas -->
+  <!-- Horas (linha única) -->
   <div>
     <label>Horas trabalhadas</label>
     <input inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="horas" />
@@ -75,10 +74,10 @@
   <!-- Relatório -->
   <div id="relatorio" class="relatorio" style="display:none;"></div>
 
-  <!-- Enviar -->
+  <!-- Botão Enviar -->
   <button id="btnEnviar" class="btn-principal" style="display:none;" onclick="abrirModal()">📤 Enviar para pagamento</button>
 
-  <!-- Modal nome -->
+  <!-- Modal personalizado -->
   <div id="nomeModal" class="modal">
     <div class="modal-content">
       <label for="inputNome">Digite seu nome e sobrenome:</label>

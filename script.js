@@ -1,4 +1,4 @@
-const APP_VERSION = "1.0.3";
+const APP_VERSION = "1.0.4";
 const storedVersion = localStorage.getItem("app_version");
 
 if (storedVersion && storedVersion !== APP_VERSION) {
@@ -53,7 +53,7 @@ function mostrarRegistros() {
   div.innerHTML = "";
 
   registros.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach((r, index) => {
-    const icone = r.funcao === "Supervisor" ? "👨‍💼" : "🧹";
+    const icone = r.funcao === "Supervisor" ? "👔" : "🧹";
     const item = document.createElement("div");
     item.className = "registro";
     item.innerHTML = `
@@ -82,11 +82,21 @@ function encerrarCiclo() {
     return;
   }
 
-  let detalhes = `**Dias trabalhados:**\nData       | Local      | Função    | Horas\n`;
+  let detalhes = `<b>Dias trabalhados:</b><br><pre style="font-family: monospace;">
+  Data       |   Local      | Função     | Horas
+------------------------------------------------
+`;
+
   registrosFiltrados.forEach(r => {
     const [ano, mes, dia] = r.data.split("-");
-    detalhes += `${dia}/${mes}/${ano} | ${r.local} | ${r.funcao} | ${r.horas} Horas\n`;
+    const dataFormatada = `${dia}/${mes}/${ano}`.padEnd(12);
+    const local = r.local.padEnd(12);
+    const funcao = r.funcao.padEnd(10);
+    const horas = `${r.horas} Horas`;
+    detalhes += `${dataFormatada}| ${local}| ${funcao}| ${horas}\n`;
   });
+
+  detalhes += `</pre>`;
 
   let resumo = {};
   let totalGeral = 0;
@@ -98,20 +108,20 @@ function encerrarCiclo() {
     totalGeral += r.horas * r.valor;
   });
 
-  let totais = `\n**Resumo por função:**\n`;
+  let totais = `<b>Resumo por função:</b><br>`;
   for (let funcao in resumo) {
     const r = resumo[funcao];
-    totais += `${funcao}: ${r.horas}h x €${r.valorHora.toFixed(2)} = €${r.total.toFixed(2)}\n`;
+    totais += `${funcao}: ${r.horas}h x €${r.valorHora.toFixed(2)} = €${r.total.toFixed(2)}<br>`;
   }
 
-  totais += `\n**Total geral: €${totalGeral.toFixed(2)}**`;
+  totais += `<br><span style="background: yellow; font-weight: bold;">Total geral: €${totalGeral.toFixed(2)}</span>`;
 
-  const relatorioFinal = `Relatório de Pagamento - ${q === "1" ? "1ª Quinzena (1-15)" : "2ª Quinzena (16-31)"}\n\n${detalhes}\n${totais}`;
+  const relatorioFinal = `Relatório de Pagamento - ${q === "1" ? "1ª Quinzena (1-15)" : "2ª Quinzena (16-31)"}<br><br>${detalhes}${totais}`;
 
   relatorioAtual = relatorioFinal;
   quinzenaAtual = q;
 
-  document.getElementById("relatorio").textContent = relatorioFinal;
+  document.getElementById("relatorio").innerHTML = relatorioFinal;
   document.getElementById("relatorio").style.display = "block";
   document.getElementById("btnEnviar").style.display = "inline-block";
 }
@@ -133,7 +143,7 @@ function confirmarNome() {
 
   const email = "cesarlinobit@gmail.com";
   const assunto = encodeURIComponent(`Solicitação de pagamento: ${nome}`);
-  const corpo = encodeURIComponent(relatorioAtual);
+  const corpo = encodeURIComponent(relatorioAtual.replace(/<br>/g, "\n").replace(/<\/?[^>]+(>|$)/g, ""));
   const mailto = `mailto:${email}?subject=${assunto}&body=${corpo}`;
   window.location.href = mailto;
 

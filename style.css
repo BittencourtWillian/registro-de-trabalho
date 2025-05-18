@@ -7,16 +7,6 @@ body {
   color: #333;
 }
 
-.logo {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.logo img {
-  max-width: 220px;
-  height: auto;
-}
-
 label {
   font-weight: bold;
   margin-bottom: 4px;
@@ -38,6 +28,7 @@ button {
   cursor: pointer;
 }
 
+/* Botões principais */
 .btn-principal {
   background: #007bff;
   color: white;
@@ -53,6 +44,7 @@ button {
   background: #0056b3;
 }
 
+/* Botão Atualizar App */
 .btn-atualizar {
   background: #e0e0e0;
   color: #333;
@@ -68,10 +60,25 @@ button {
   margin-bottom: 20px;
 }
 
+/* Título centralizado com logo ao lado */
+.titulo-com-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.titulo-com-logo img {
+  height: 50px;
+  width: auto;
+}
+
 .centralizado {
   text-align: center;
 }
 
+/* Layout de duas colunas */
 .linha-dupla {
   display: flex;
   flex-wrap: wrap;
@@ -83,6 +90,7 @@ button {
   flex: 1 1 48%;
 }
 
+/* Registros em estilo cartão */
 .registro {
   background: #fff;
   border: 1px solid #ddd;
@@ -102,6 +110,7 @@ button {
   margin-top: 8px;
 }
 
+/* Relatório com destaque */
 .relatorio {
   white-space: pre-wrap;
   background: #f0f0f0;
@@ -109,9 +118,10 @@ button {
   margin-top: 20px;
   border-radius: 6px;
   font-family: monospace;
+  font-size: 14px;
 }
 
-/* Modal */
+/* Modal escuro com destaque central */
 .modal {
   display: none;
   position: fixed;
@@ -141,10 +151,12 @@ button {
   margin: 10px 0;
 }
 
+/* Botões do modal */
 .botoes-modal {
   display: flex;
   justify-content: space-between;
   gap: 10px;
+  margin-top: 10px;
 }
 
 .botoes-modal button {
@@ -161,8 +173,13 @@ button {
   background: #0056b3;
 }
 
+/* Responsividade */
 @media (max-width: 480px) {
   .linha-dupla > div {
     flex: 1 1 100%;
+  }
+
+  .titulo-com-logo {
+    flex-direction: column;
   }
 }
