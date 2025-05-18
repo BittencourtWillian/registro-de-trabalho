@@ -71,7 +71,7 @@ function encerrarCiclo() {
     return;
   }
 
-  const inicio = q === "1" ? 1 : 16;
+  const inicio = q === "1" ? 1 : 15;
   const fim = q === "1" ? 15 : 31;
 
   const registrosFiltrados = registros.filter(r => r.dia >= inicio && r.dia <= fim);
@@ -113,7 +113,10 @@ function encerrarCiclo() {
   document.getElementById("relatorio").textContent = relatorioFinal;
   document.getElementById("relatorio").style.display = "block";
   document.getElementById("btnEnviar").style.display = "inline-block";
-function enviarEmail() {
+}
+
+// Substituto do prompt
+function abrirModal() {
   document.getElementById("nomeModal").style.display = "flex";
 }
 
