@@ -8,35 +8,38 @@
   <script defer src="script.js"></script>
 </head>
 <body>
+  <!-- Logo da empresa -->
   <div class="logo">
     <img src="https://raw.githubusercontent.com/BittencourtWillian/registro-de-trabalho/main/logo.png" alt="Marvel Cleaning Services" />
   </div>
 
+  <!-- Botão Atualizar -->
   <div class="topo">
     <button onclick="location.reload()" class="btn-atualizar">🔄 Atualizar App</button>
   </div>
 
+  <!-- Título -->
   <h2>Registro de Trabalho</h2>
 
+  <!-- Campo Local (linha cheia) -->
+  <div>
+    <label>Local de Trabalho</label>
+    <select id="local">
+      <option value="">Selecione</option>
+      <option value="Santry">Santry</option>
+      <option value="East Wall">East Wall</option>
+      <option value="Lesson">Lesson</option>
+      <option value="St. Mary">St. Mary</option>
+      <option value="Navan">Navan</option>
+    </select>
+  </div>
+
+  <!-- Linha dupla: Data + Função -->
   <div class="linha-dupla">
-    <div>
-      <label>Local de Trabalho</label>
-      <select id="local">
-        <option value="">Selecione</option>
-        <option value="Santry">Santry</option>
-        <option value="East Wall">East Wall</option>
-        <option value="Lesson">Lesson</option>
-        <option value="St. Mary">St. Mary</option>
-        <option value="Navan">Navan</option>
-      </select>
-    </div>
     <div>
       <label>Data</label>
       <input type="date" id="data" />
     </div>
-  </div>
-
-  <div class="linha-dupla">
     <div>
       <label>Função</label>
       <select id="funcao">
@@ -45,17 +48,22 @@
         <option value="Supervisor">Supervisor</option>
       </select>
     </div>
-    <div>
-      <label>Horas trabalhadas</label>
-      <input inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="horas" />
-    </div>
   </div>
 
+  <!-- Campo Horas -->
+  <div>
+    <label>Horas trabalhadas</label>
+    <input inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="horas" />
+  </div>
+
+  <!-- Botão Adicionar -->
   <button class="btn-principal" onclick="adicionarRegistro()">➕ Adicionar Registro</button>
 
+  <!-- Registros -->
   <h3 class="centralizado">Registros</h3>
   <div id="listaRegistros"></div>
 
+  <!-- Encerrar Ciclo -->
   <h3 class="centralizado">Encerrar Ciclo</h3>
   <label>Fechamento:</label>
   <select id="quinzena">
@@ -65,10 +73,13 @@
   </select>
   <button class="btn-principal" onclick="encerrarCiclo()">📄 Gerar Relatório</button>
 
+  <!-- Relatório -->
   <div id="relatorio" class="relatorio" style="display:none;"></div>
+
+  <!-- Botão Enviar -->
   <button id="btnEnviar" class="btn-principal" style="display:none;" onclick="abrirModal()">📤 Enviar para pagamento</button>
 
-  <!-- Modal personalizado -->
+  <!-- Modal para nome -->
   <div id="nomeModal" class="modal">
     <div class="modal-content">
       <label for="inputNome">Digite seu nome e sobrenome:</label>
