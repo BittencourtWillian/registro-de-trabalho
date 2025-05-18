@@ -3,7 +3,7 @@ body {
   padding: 20px;
   max-width: 700px;
   margin: auto;
-  background: #fafafa;
+  background: #d0e7ff; /* azul suave */
   color: #333;
 }
 
@@ -28,7 +28,6 @@ button {
   cursor: pointer;
 }
 
-/* Botões principais */
 .btn-principal {
   background: #007bff;
   color: white;
@@ -44,7 +43,6 @@ button {
   background: #0056b3;
 }
 
-/* Botão Atualizar App */
 .btn-atualizar {
   background: #e0e0e0;
   color: #333;
@@ -54,31 +52,10 @@ button {
   font-size: 14px;
 }
 
-.topo {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-/* Título centralizado com logo ao lado */
-.titulo-com-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.titulo-com-logo img {
-  height: 50px;
-  width: auto;
-}
-
 .centralizado {
   text-align: center;
 }
 
-/* Layout de duas colunas */
 .linha-dupla {
   display: flex;
   flex-wrap: wrap;
@@ -90,7 +67,6 @@ button {
   flex: 1 1 48%;
 }
 
-/* Registros em estilo cartão */
 .registro {
   background: #fff;
   border: 1px solid #ddd;
@@ -110,18 +86,15 @@ button {
   margin-top: 8px;
 }
 
-/* Relatório com destaque */
 .relatorio {
-  white-space: pre-wrap;
   background: #f0f0f0;
   padding: 15px;
   margin-top: 20px;
   border-radius: 6px;
-  font-family: monospace;
   font-size: 14px;
+  overflow-x: auto;
 }
 
-/* Modal escuro com destaque central */
 .modal {
   display: none;
   position: fixed;
@@ -151,12 +124,10 @@ button {
   margin: 10px 0;
 }
 
-/* Botões do modal */
 .botoes-modal {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  margin-top: 10px;
 }
 
 .botoes-modal button {
@@ -169,17 +140,14 @@ button {
   color: white;
 }
 
-.botoes-modal button:hover {
-  background: #0056b3;
+.rodape {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
 }
 
-/* Responsividade */
 @media (max-width: 480px) {
   .linha-dupla > div {
     flex: 1 1 100%;
-  }
-
-  .titulo-com-logo {
-    flex-direction: column;
   }
 }
