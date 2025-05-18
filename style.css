@@ -151,3 +151,10 @@ button {
     flex: 1 1 100%;
   }
 }
+input[type="date"] {
+  width: 100%;
+  min-height: 42px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
