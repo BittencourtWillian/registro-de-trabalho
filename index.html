@@ -8,18 +8,10 @@
   <script defer src="script.js"></script>
 </head>
 <body>
-  <!-- Título com logo ao lado -->
-  <div class="titulo-com-logo">
-    <img src="https://raw.githubusercontent.com/BittencourtWillian/registro-de-trabalho/main/logo.png" alt="Marvel Logo" />
-    <h2>Registro de Trabalho</h2>
-  </div>
+  <!-- Título -->
+  <h2 class="centralizado">Registro de Trabalho</h2>
 
-  <!-- Botão Atualizar -->
-  <div class="topo">
-    <button onclick="location.reload()" class="btn-atualizar">🔄 Atualizar App</button>
-  </div>
-
-  <!-- Local (linha cheia) -->
+  <!-- Campo Local -->
   <div>
     <label>Local de Trabalho</label>
     <select id="local">
@@ -36,7 +28,7 @@
   <div class="linha-dupla">
     <div>
       <label>Data</label>
-      <input type="date" id="data" />
+      <input type="date" id="data" placeholder="Selecione" />
     </div>
     <div>
       <label>Função</label>
@@ -48,7 +40,7 @@
     </div>
   </div>
 
-  <!-- Horas (linha única) -->
+  <!-- Horas -->
   <div>
     <label>Horas trabalhadas</label>
     <input inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="horas" />
@@ -88,5 +80,11 @@
       </div>
     </div>
   </div>
+
+  <!-- Rodapé com botão atualizar -->
+  <footer class="rodape">
+    <button onclick="location.reload()" class="btn-atualizar">🔄 Atualizar App</button>
+  </footer>
 </body>
 </html>
+
