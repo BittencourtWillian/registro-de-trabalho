@@ -68,8 +68,15 @@ function encerrarCiclo() {
     return;
   }
 
-  const inicio = q === "1" ? 1 : 16;
-  const fim = q === "1" ? 15 : 31;
+  let inicio, fim;
+if (q === "1") {
+  inicio = 1; fim = 15;
+} else if (q === "2") {
+  inicio = 16; fim = 31;
+} else if (q === "M") {
+  inicio = 1; fim = 31;
+}
+
 
   const registrosFiltrados = registros.filter(r => r.dia >= inicio && r.dia <= fim);
 
@@ -111,7 +118,12 @@ function encerrarCiclo() {
 
   totais += `<br><span style="background: yellow; font-weight: bold;">Total geral: €${totalGeral.toFixed(2)}</span>`;
 
-  const relatorioFinal = `Relatório de Pagamento - ${q === "1" ? "1ª Quinzena (1-15)" : "2ª Quinzena (16-31)"}<br><br>${tabela}${totais}`;
+ let titulo = "";
+if (q === "1") titulo = "1ª Quinzena (1-15)";
+else if (q === "2") titulo = "2ª Quinzena (16-31)";
+else titulo = "Mensal (1-31)";
+
+const relatorioFinal = `Relatório de Pagamento - ${titulo}<br><br>${tabela}${totais}`;
 
   relatorioAtual = relatorioFinal;
   quinzenaAtual = q;
