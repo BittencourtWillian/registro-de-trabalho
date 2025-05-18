@@ -158,3 +158,10 @@ input[type="date"] {
   -webkit-appearance: none;
   -moz-appearance: none;
 }
+/* Padroniza altura dos campos principais */
+input[type="date"],
+input,
+select {
+  height: 42px;
+  line-height: 1.2;
+}
