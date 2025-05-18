@@ -117,7 +117,8 @@ if (q === "1") {
   }
 
   totais += `<br><span style="background: yellow; font-weight: bold;">Total geral: €${totalGeral.toFixed(2)}</span>`;
-
+  
+let corpoTexto = `Relatório de Pagamento - ${titulo}\n\n`;
  let titulo = "";
 if (q === "1") titulo = "1ª Quinzena (1-15)";
 else if (q === "2") titulo = "2ª Quinzena (16-31)";
@@ -151,8 +152,15 @@ function confirmarNome() {
   const email = "cesarlinobit@gmail.com";
   const assunto = encodeURIComponent(`Solicitação de pagamento: ${nome}`);
 
-  const inicio = quinzenaAtual === "1" ? 1 : 16;
-  const fim = quinzenaAtual === "1" ? 15 : 31;
+  let inicio, fim;
+if (quinzenaAtual === "1") {
+  inicio = 1; fim = 15;
+} else if (quinzenaAtual === "2") {
+  inicio = 16; fim = 31;
+} else {
+  inicio = 1; fim = 31;
+}
+
 
   const registrosFiltrados = registros.filter(r => r.dia >= inicio && r.dia <= fim);
 
