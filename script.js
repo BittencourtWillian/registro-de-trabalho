@@ -113,10 +113,12 @@ function encerrarCiclo() {
   document.getElementById("relatorio").textContent = relatorioFinal;
   document.getElementById("relatorio").style.display = "block";
   document.getElementById("btnEnviar").style.display = "inline-block";
+function enviarEmail() {
+  document.getElementById("nomeModal").style.display = "flex";
 }
 
-function enviarEmail() {
-  const nome = prompt("Digite seu nome e sobrenome:");
+function confirmarNome() {
+  const nome = document.getElementById("inputNome").value.trim();
   if (!nome || nome.length < 3) {
     alert("Nome inválido.");
     return;
@@ -127,6 +129,8 @@ function enviarEmail() {
   const corpo = encodeURIComponent(relatorioAtual);
   const mailto = `mailto:${email}?subject=${assunto}&body=${corpo}`;
   window.location.href = mailto;
+
+  document.getElementById("nomeModal").style.display = "none";
 
   const inicio = quinzenaAtual === "1" ? 1 : 16;
   const fim = quinzenaAtual === "1" ? 15 : 31;
