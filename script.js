@@ -68,15 +68,14 @@ function encerrarCiclo() {
     return;
   }
 
-  let inicio, fim;
-if (q === "1") {
-  inicio = 1; fim = 15;
-} else if (q === "2") {
-  inicio = 16; fim = 31;
-} else if (q === "M") {
-  inicio = 1; fim = 31;
-}
-
+  let inicio, fim, titulo;
+  if (q === "1") {
+    inicio = 1; fim = 15; titulo = "1ª Quinzena (1-15)";
+  } else if (q === "2") {
+    inicio = 16; fim = 31; titulo = "2ª Quinzena (16-31)";
+  } else if (q === "M") {
+    inicio = 1; fim = 31; titulo = "Mensal (1-31)";
+  }
 
   const registrosFiltrados = registros.filter(r => r.dia >= inicio && r.dia <= fim);
 
@@ -117,14 +116,8 @@ if (q === "1") {
   }
 
   totais += `<br><span style="background: yellow; font-weight: bold;">Total geral: €${totalGeral.toFixed(2)}</span>`;
-  
-let corpoTexto = `Relatório de Pagamento - ${titulo}\n\n`;
- let titulo = "";
-if (q === "1") titulo = "1ª Quinzena (1-15)";
-else if (q === "2") titulo = "2ª Quinzena (16-31)";
-else titulo = "Mensal (1-31)";
 
-const relatorioFinal = `Relatório de Pagamento - ${titulo}<br><br>${tabela}${totais}`;
+  const relatorioFinal = `Relatório de Pagamento - ${titulo}<br><br>${tabela}${totais}`;
 
   relatorioAtual = relatorioFinal;
   quinzenaAtual = q;
@@ -152,21 +145,19 @@ function confirmarNome() {
   const email = "cesarlinobit@gmail.com";
   const assunto = encodeURIComponent(`Solicitação de pagamento: ${nome}`);
 
-  let inicio, fim;
-if (quinzenaAtual === "1") {
-  inicio = 1; fim = 15;
-} else if (quinzenaAtual === "2") {
-  inicio = 16; fim = 31;
-} else {
-  inicio = 1; fim = 31;
-}
-
+  let inicio, fim, titulo;
+  if (quinzenaAtual === "1") {
+    inicio = 1; fim = 15; titulo = "1ª Quinzena (1-15)";
+  } else if (quinzenaAtual === "2") {
+    inicio = 16; fim = 31; titulo = "2ª Quinzena (16-31)";
+  } else {
+    inicio = 1; fim = 31; titulo = "Mensal (1-31)";
+  }
 
   const registrosFiltrados = registros.filter(r => r.dia >= inicio && r.dia <= fim);
 
-  let corpoTexto = `Relatório de Pagamento - ${quinzenaAtual === "1" ? "1ª Quinzena (1-15)" : "2ª Quinzena (16-31)"}\n\n`;
+  let corpoTexto = `Relatório de Pagamento - ${titulo}\n\nDias trabalhados:\n`;
 
-  corpoTexto += `Dias trabalhados:\n`;
   registrosFiltrados.forEach(r => {
     const [ano, mes, dia] = r.data.split("-");
     corpoTexto += `${dia}/${mes}/${ano} | ${r.local} | ${r.funcao} | ${r.horas} Horas\n`;
@@ -196,7 +187,6 @@ if (quinzenaAtual === "1") {
 
   fecharModal();
 
-  // Limpar registros da quinzena atual
   registros = registros.filter(r => !(r.dia >= inicio && r.dia <= fim));
   salvarRegistros();
 
@@ -204,7 +194,6 @@ if (quinzenaAtual === "1") {
   document.getElementById("btnEnviar").style.display = "none";
   document.getElementById("quinzena").value = "";
 }
-
 
 function excluirRegistro(index) {
   registros.splice(index, 1);
