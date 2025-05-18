@@ -138,14 +138,45 @@ function confirmarNome() {
 
   const email = "cesarlinobit@gmail.com";
   const assunto = encodeURIComponent(`Solicitação de pagamento: ${nome}`);
-  const corpo = encodeURIComponent(relatorioAtual.replace(/<[^>]+>/g, '').replace(/<br\s*\/?>/gi, '\n'));
+
+  const inicio = quinzenaAtual === "1" ? 1 : 16;
+  const fim = quinzenaAtual === "1" ? 15 : 31;
+
+  const registrosFiltrados = registros.filter(r => r.dia >= inicio && r.dia <= fim);
+
+  let corpoTexto = `Relatório de Pagamento - ${quinzenaAtual === "1" ? "1ª Quinzena (1-15)" : "2ª Quinzena (16-31)"}\n\n`;
+
+  corpoTexto += `Dias trabalhados:\n`;
+  registrosFiltrados.forEach(r => {
+    const [ano, mes, dia] = r.data.split("-");
+    corpoTexto += `${dia}/${mes}/${ano} | ${r.local} | ${r.funcao} | ${r.horas} Horas\n`;
+  });
+
+  let resumo = {};
+  let totalGeral = 0;
+
+  registrosFiltrados.forEach(r => {
+    if (!resumo[r.funcao]) resumo[r.funcao] = { horas: 0, total: 0, valorHora: r.valor };
+    resumo[r.funcao].horas += r.horas;
+    resumo[r.funcao].total += r.horas * r.valor;
+    totalGeral += r.horas * r.valor;
+  });
+
+  corpoTexto += `\nResumo por função:\n`;
+  for (let funcao in resumo) {
+    const r = resumo[funcao];
+    corpoTexto += `${funcao}: ${r.horas}h x €${r.valorHora.toFixed(2)} = €${r.total.toFixed(2)}\n`;
+  }
+
+  corpoTexto += `\nTotal geral: €${totalGeral.toFixed(2)}`;
+
+  const corpo = encodeURIComponent(corpoTexto);
   const mailto = `mailto:${email}?subject=${assunto}&body=${corpo}`;
   window.location.href = mailto;
 
   fecharModal();
 
-  const inicio = quinzenaAtual === "1" ? 1 : 16;
-  const fim = quinzenaAtual === "1" ? 15 : 31;
+  // Limpar registros da quinzena atual
   registros = registros.filter(r => !(r.dia >= inicio && r.dia <= fim));
   salvarRegistros();
 
@@ -153,6 +184,7 @@ function confirmarNome() {
   document.getElementById("btnEnviar").style.display = "none";
   document.getElementById("quinzena").value = "";
 }
+
 
 function excluirRegistro(index) {
   registros.splice(index, 1);
