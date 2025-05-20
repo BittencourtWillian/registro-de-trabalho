@@ -108,8 +108,11 @@
             <td>€${(r.horas * r.valorHora).toFixed(2)}</td>
             <td>${r.quinzena}</td>
           `;
-          totalHoras += r.horas;
-          totalValor += r.horas * r.valorHora;
+          const horas = parseFloat(r.horas);
+const valor = parseFloat(r.valorHora);
+totalHoras += horas;
+totalValor += horas * valor;
+
           tabela.appendChild(linha);
         });
 
