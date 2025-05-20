@@ -88,71 +88,98 @@
     let chart;
 
     async function carregarRegistros() {
-      const snapshot = await getDocs(collection(db, "registros"));
-      let registros = [];
-      snapshot.forEach(doc => registros.push(doc.data()));
+      try {
+        const snapshot = await getDocs(collection(db, "registros"));
+        let registros = [];
+        snapshot.forEach(doc => registros.push(doc.data()));
 
-      const nomeFiltro = document.getElementById("filtroNome").value.trim().toLowerCase();
-      const funcaoFiltro = document.getElementById("filtroFuncao").value;
-      const localFiltro = document.getElementById("filtroLocal").value;
-      const quinzenaFiltro = document.getElementById("filtroQuinzena").value;
-      const dataInicio = document.getElementById("filtroDataInicio").value;
-      const dataFim = document.getElementById("filtroDataFim").value;
+        const nomeFiltro = document.getElementById("filtroNome").value.trim().toLowerCase();
+        const funcaoFiltro = document.getElementById("filtroFuncao").value;
+        const localFiltro = document.getElementById("filtroLocal").value;
+        const quinzenaFiltro = document.getElementById("filtroQuinzena").value;
+        const dataInicio = document.getElementById("filtroDataInicio").value;
+        const dataFim = document.getElementById("filtroDataFim").value;
 
-      const tabela = document.getElementById("tabelaRegistros");
-      const resumo = document.getElementById("resumo");
-      tabela.innerHTML = "";
+        const tabela = document.getElementById("tabelaRegistros");
+        const resumo = document.getElementById("resumo");
+        tabela.innerHTML = "";
 
-      let totalHoras = 0;
-      let totalValor = 0;
-      let horasPorFuncionario = {};
+        let totalHoras = 0;
+        let totalValor = 0;
+        let horasPorFuncionario = {};
 
-      const filtrados = registros.filter(r => {
-        const nome = (r.nome || '').toLowerCase();
-        const funcao = r.funcao || '';
-        const local = r.local || '';
-        const quinzena = r.quinzena || '';
-        const data = r.data || '';
+        const filtrados = registros.filter(r => {
+          const nome = (r.nome || '').toLowerCase();
+          const funcao = r.funcao || '';
+          const local = r.local || '';
+          const quinzena = r.quinzena || '';
+          const dataStr = r.data || '';
+          
+          // Verificar filtro de data
+          let dataValida = true;
+          if (dataInicio || dataFim) {
+            if (!dataStr) {
+              dataValida = false;
+            } else {
+              const dataRegistro = new Date(dataStr);
+              const inicio = dataInicio ? new Date(dataInicio) : null;
+              const fim = dataFim ? new Date(dataFim) : null;
+              
+              if (inicio && dataRegistro < inicio) dataValida = false;
+              if (fim && dataRegistro > fim) dataValida = false;
+            }
+          }
 
-        const dataValida = (!dataInicio || new Date(data) >= new Date(dataInicio)) &&
-                           (!dataFim || new Date(data) <= new Date(dataFim));
+          return (!nomeFiltro || nome.includes(nomeFiltro)) &&
+                 (!funcaoFiltro || funcao === funcaoFiltro) &&
+                 (!localFiltro || local === localFiltro) &&
+                 (!quinzenaFiltro || quinzena === quinzenaFiltro) &&
+                 dataValida;
+        });
 
-        return (!nomeFiltro || nome.includes(nomeFiltro)) &&
-               (!funcaoFiltro || funcao === funcaoFiltro) &&
-               (!localFiltro || local === localFiltro) &&
-               (!quinzenaFiltro || quinzena === quinzenaFiltro) &&
-               dataValida;
-      });
+        filtrados.sort((a, b) => {
+          const dateA = new Date(a.data || 0);
+          const dateB = new Date(b.data || 0);
+          return dateA - dateB;
+        }).forEach(r => {
+          const horas = parseFloat(r.horas) || 0;
+          const valor = parseFloat(r.valorHora) || 0;
+          const nome = r.nome || "(sem nome)";
+          const valorTotal = horas * valor;
 
-      filtrados.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(r => {
-        const horas = parseFloat(r.horas) || 0;
-        const valor = parseFloat(r.valorHora) || 0;
-        const nome = r.nome || "(sem nome)";
+          const linha = document.createElement("tr");
+          linha.innerHTML = `
+            <td>${formatarData(r.data)}</td>
+            <td>${nome}</td>
+            <td>${r.funcao || ''}</td>
+            <td>${r.local || ''}</td>
+            <td>${horas.toFixed(2)}</td>
+            <td>€${valorTotal.toFixed(2)}</td>
+            <td>${r.quinzena || ''}</td>
+          `;
+          tabela.appendChild(linha);
 
-        const linha = document.createElement("tr");
-        linha.innerHTML = `
-          <td>${formatarData(r.data)}</td>
-          <td>${nome}</td>
-          <td>${r.funcao}</td>
-          <td>${r.local}</td>
-          <td>${horas}</td>
-          <td>€${(horas * valor).toFixed(2)}</td>
-          <td>${r.quinzena}</td>
-        `;
-        tabela.appendChild(linha);
+          totalHoras += horas;
+          totalValor += valorTotal;
+          horasPorFuncionario[nome] = (horasPorFuncionario[nome] || 0) + horas;
+        });
 
-        totalHoras += horas;
-        totalValor += horas * valor;
-        horasPorFuncionario[nome] = (horasPorFuncionario[nome] || 0) + horas;
-      });
-
-      resumo.textContent = `Total de horas: ${totalHoras}h | Valor total: €${totalValor.toFixed(2)}`;
-      desenharGrafico(horasPorFuncionario);
+        resumo.textContent = `Total de horas: ${totalHoras.toFixed(2)}h | Valor total: €${totalValor.toFixed(2)}`;
+        desenharGrafico(horasPorFuncionario);
+      } catch (error) {
+        console.error("Erro ao carregar registros:", error);
+        alert("Ocorreu um erro ao carregar os registros. Verifique o console para mais detalhes.");
+      }
     }
 
     function formatarData(iso) {
-      const d = new Date(iso);
-      return d.toLocaleDateString("pt-BR");
+      if (!iso) return '';
+      try {
+        const d = new Date(iso);
+        return isNaN(d.getTime()) ? iso : d.toLocaleDateString("pt-BR");
+      } catch {
+        return iso;
+      }
     }
 
     function exportarCSV() {
@@ -166,31 +193,78 @@
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "registros.csv";
+      link.download = `registros_${new Date().toISOString().slice(0,10)}.csv`;
       link.click();
     }
 
     function desenharGrafico(dados) {
       const ctx = document.getElementById("graficoHoras").getContext("2d");
       if (chart) chart.destroy();
+      
+      // Ordenar por horas (do maior para o menor)
+      const entries = Object.entries(dados).sort((a, b) => b[1] - a[1]);
+      const labels = entries.map(e => e[0]);
+      const values = entries.map(e => e[1]);
+
       chart = new Chart(ctx, {
         type: "bar",
         data: {
-          labels: Object.keys(dados),
+          labels: labels,
           datasets: [{
             label: "Horas por Funcionário",
-            data: Object.values(dados)
+            data: values,
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
           }]
         },
         options: {
           responsive: true,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true } }
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.parsed.y.toFixed(2)} horas`;
+                }
+              }
+            }
+          },
+          scales: { 
+            y: { 
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Horas trabalhadas'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Funcionários'
+              }
+            }
+          }
         }
       });
     }
 
-    carregarRegistros();
+    // Adiciona event listeners para os filtros
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarRegistros();
+      
+      // Atualiza automaticamente quando qualquer filtro é alterado
+      document.getElementById("filtroNome").addEventListener('input', carregarRegistros);
+      document.getElementById("filtroFuncao").addEventListener('change', carregarRegistros);
+      document.getElementById("filtroLocal").addEventListener('change', carregarRegistros);
+      document.getElementById("filtroQuinzena").addEventListener('change', carregarRegistros);
+      document.getElementById("filtroDataInicio").addEventListener('change', carregarRegistros);
+      document.getElementById("filtroDataFim").addEventListener('change', carregarRegistros);
+    });
+
+    // Expor funções para o escopo global (para os botões HTML)
+    window.carregarRegistros = carregarRegistros;
+    window.exportarCSV = exportarCSV;
   </script>
 </body>
 </html>
