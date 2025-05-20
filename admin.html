@@ -98,24 +98,40 @@
       return nomeValido && funcaoValida && localValido && quinzenaValida;
     })
     .sort((a, b) => new Date(a.data) - new Date(b.data))
-    .forEach(r => {
-      const horas = parseFloat(r.horas) || 0;
-      const valor = parseFloat(r.valorHora) || 0;
+  .forEach(r => {
+  const nome = (r.nome || "").toLowerCase();
+  const funcao = r.funcao || "";
+  const local = r.local || "";
+  const quinzena = r.quinzena || "";
+  const horas = parseFloat(r.horas) || 0;
+  const valor = parseFloat(r.valorHora) || 0;
 
-      const linha = document.createElement("tr");
-      linha.innerHTML = `
-        <td>${formatarData(r.data)}</td>
-        <td>${r.nome || "-"}</td>
-        <td>${r.funcao || "-"}</td>
-        <td>${r.local || "-"}</td>
-        <td>${horas}</td>
-        <td>€${(horas * valor).toFixed(2)}</td>
-        <td>${r.quinzena || "-"}</td>
-      `;
-      totalHoras += horas;
-      totalValor += horas * valor;
-      tabela.appendChild(linha);
-    });
+  // Aplicar os filtros novamente com valores seguros
+  if (
+    (nomeFiltro && !nome.includes(nomeFiltro)) ||
+    (funcaoFiltro && funcao !== funcaoFiltro) ||
+    (localFiltro && local !== localFiltro) ||
+    (quinzenaFiltro && quinzena !== quinzenaFiltro)
+  ) {
+    return; // pular esse registro
+  }
+
+  const linha = document.createElement("tr");
+  linha.innerHTML = `
+    <td>${formatarData(r.data)}</td>
+    <td>${r.nome || "-"}</td>
+    <td>${funcao}</td>
+    <td>${local}</td>
+    <td>${horas}</td>
+    <td>€${(horas * valor).toFixed(2)}</td>
+    <td>${quinzena}</td>
+  `;
+
+  totalHoras += horas;
+  totalValor += horas * valor;
+  tabela.appendChild(linha);
+});
+
 
   resumo.innerHTML = `Total de horas: ${totalHoras}h | Valor total: €${totalValor.toFixed(2)}`;
 }
