@@ -1,1 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Marvel Cleaning</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"> <!-- usa o mesmo estilo do app -->
+  <style>
+    body { padding: 20px; background-color: #f8f9fa; font-family: sans-serif; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
+    th { background: #eee; }
+    .filtros > * { margin-right: 10px; margin-bottom: 10px; }
+    .resumo { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>📊 Dashboard - Registros de Funcionários</h2>
+
+  <div class="filtros">
+    <input type="text" id="filtroNome" placeholder="Filtrar por nome">
+    <select id="filtroFuncao">
+      <option value="">Todas as funções</option>
+      <option value="Cleaner">Cleaner</option>
+      <option value="Supervisor">Supervisor</option>
+    </select>
+    <select id="filtroLocal">
+      <option value="">Todos os locais</option>
+      <option value="Santry">Santry</option>
+      <option value="East Wall">East Wall</option>
+      <option value="Lesson">Lesson</option>
+      <option value="St. Mary">St. Mary</option>
+      <option value="Navan">Navan</option>
+    </select>
+    <select id="filtroQuinzena">
+      <option value="">Todas as quinzenas</option>
+      <option value="1">1ª Quinzena</option>
+      <option value="2">2ª Quinzena</option>
+      <option value="M">Mensal</option>
+    </select>
+    <button onclick="carregarRegistros()">🔄 Atualizar</button>
+  </div>
+
+  <div class="resumo" id="resumo"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Nome</th>
+        <th>Função</th>
+        <th>Local</th>
+        <th>Horas</th>
+        <th>Valor (€)</th>
+        <th>Quinzena</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaRegistros"></tbody>
+  </table>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDBZvkl_LNF2dknJMDnz1ADUs367Asgaoo",
+      authDomain: "marvel-cleaning.firebaseapp.com",
+      projectId: "marvel-cleaning",
+      storageBucket: "marvel-cleaning.appspot.com",
+      messagingSenderId: "1019742825233",
+      appId: "1:1019742825233:web:750e2037636e28af617ab0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function carregarRegistros() {
+      const snapshot = await getDocs(collection(db, "registros"));
+      let registros = [];
+      snapshot.forEach(doc => registros.push(doc.data()));
+
+      const nomeFiltro = document.getElementById("filtroNome").value.toLowerCase();
+      const funcaoFiltro = document.getElementById("filtroFuncao").value;
+      const localFiltro = document.getElementById("filtroLocal").value;
+      const quinzenaFiltro = document.getElementById("filtroQuinzena").value;
+
+      const tabela = document.getElementById("tabelaRegistros");
+      const resumo = document.getElementById("resumo");
+      tabela.innerHTML = "";
+      let totalHoras = 0;
+      let totalValor = 0;
+
+      registros
+        .filter(r =>
+          (!nomeFiltro || r.nome?.toLowerCase().includes(nomeFiltro)) &&
+          (!funcaoFiltro || r.funcao === funcaoFiltro) &&
+          (!localFiltro || r.local === localFiltro) &&
+          (!quinzenaFiltro || r.quinzena === quinzenaFiltro)
+        )
+        .sort((a, b) => new Date(a.data) - new Date(b.data))
+        .forEach(r => {
+          const linha = document.createElement("tr");
+          linha.innerHTML = `
+            <td>${formatarData(r.data)}</td>
+            <td>${r.nome}</td>
+            <td>${r.funcao}</td>
+            <td>${r.local}</td>
+            <td>${r.horas}</td>
+            <td>€${(r.horas * r.valorHora).toFixed(2)}</td>
+            <td>${r.quinzena}</td>
+          `;
+          totalHoras += r.horas;
+          totalValor += r.horas * r.valorHora;
+          tabela.appendChild(linha);
+        });
+
+      resumo.innerHTML = `Total de horas: ${totalHoras}h | Valor total: €${totalValor.toFixed(2)}`;
+    }
+
+    function formatarData(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString("pt-BR");
+    }
+
+    carregarRegistros();
+  </script>
+</body>
+</html>
 
