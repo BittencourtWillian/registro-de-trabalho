@@ -1,3 +1,45 @@
+<!-- Adicione este script no <head> do seu HTML -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDBZvkl_LNF2dknJMDnz1ADUs367Asgaoo",
+    authDomain: "marvel-cleaning.firebaseapp.com",
+    projectId: "marvel-cleaning",
+    storageBucket: "marvel-cleaning.firebasestorage.app",
+    messagingSenderId: "1019742825233",
+    appId: "1:1019742825233:web:750e2037636e28af617ab0",
+    measurementId: "G-7032Q802JY"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.salvarRegistrosNoFirestore = async function(registros, nome, quinzena) {
+    try {
+      for (const r of registros) {
+        await addDoc(collection(db, "registros"), {
+          nome: nome,
+          data: r.data,
+          local: r.local,
+          funcao: r.funcao,
+          horas: r.horas,
+          valorHora: r.valor,
+          quinzena: quinzena,
+          enviadoEm: new Date().toISOString()
+        });
+      }
+      console.log("Registros salvos no Firestore com sucesso.");
+    } catch (e) {
+      console.error("Erro ao salvar no Firestore: ", e);
+    }
+  };
+</script>
+
+
+
+
 const APP_VERSION = "1.0.5";
 const storedVersion = localStorage.getItem("app_version");
 
@@ -135,7 +177,7 @@ function fecharModal() {
   document.getElementById("nomeModal").style.display = "none";
 }
 
-function confirmarNome() {
+async function confirmarNome() {
   const nome = document.getElementById("inputNome").value.trim();
   if (!nome || nome.length < 3) {
     alert("Nome inválido.");
@@ -156,6 +198,10 @@ function confirmarNome() {
 
   const registrosFiltrados = registros.filter(r => r.dia >= inicio && r.dia <= fim);
 
+  // 🔽 Salvar os dados no Firebase Firestore
+  await salvarRegistrosNoFirestore(registrosFiltrados, nome, quinzenaAtual);
+
+  // 🔽 Enviar por e-mail
   let corpoTexto = `Relatório de Pagamento - ${titulo}\n\nDias trabalhados:\n`;
 
   registrosFiltrados.forEach(r => {
@@ -194,6 +240,7 @@ function confirmarNome() {
   document.getElementById("btnEnviar").style.display = "none";
   document.getElementById("quinzena").value = "";
 }
+
 
 function excluirRegistro(index) {
   registros.splice(index, 1);
