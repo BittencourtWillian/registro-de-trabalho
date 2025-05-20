@@ -5,63 +5,69 @@
   <title>Dashboard Marvel Cleaning</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { padding: 20px; background-color: #f8f9fa; font-family: sans-serif; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
     th { background: #eee; }
-    .filtros > * { margin-right: 10px; margin-bottom: 10px; }
+    .filtros { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+    .filtros div { display: flex; flex-direction: column; }
     .resumo { margin-top: 20px; font-weight: bold; }
+    .acoes { margin-top: 20px; display: flex; gap: 10px; align-items: center; }
+    canvas { margin-top: 40px; max-width: 800px; }
   </style>
 </head>
 <body>
   <h2>📊 Dashboard - Registros de Funcionários</h2>
 
   <div class="filtros">
-    <input type="text" id="filtroNome" placeholder="Filtrar por nome">
-    <select id="filtroFuncao">
-      <option value="">Todas as funções</option>
+    <div><label>🙍 Nome:</label><input type="text" id="filtroNome" placeholder="Filtrar por nome"></div>
+    <div><label>🧹 Função:</label><select id="filtroFuncao">
+      <option value="">Todas</option>
       <option value="Cleaner">Cleaner</option>
       <option value="Supervisor">Supervisor</option>
-    </select>
-    <select id="filtroLocal">
-      <option value="">Todos os locais</option>
+    </select></div>
+    <div><label>📍 Local:</label><select id="filtroLocal">
+      <option value="">Todos</option>
       <option value="Santry">Santry</option>
       <option value="East Wall">East Wall</option>
       <option value="Lesson">Lesson</option>
       <option value="St. Mary">St. Mary</option>
       <option value="Navan">Navan</option>
-    </select>
-    <select id="filtroQuinzena">
-      <option value="">Todas as quinzenas</option>
+    </select></div>
+    <div><label>📆 Quinzena:</label><select id="filtroQuinzena">
+      <option value="">Todas</option>
       <option value="1">1ª Quinzena</option>
       <option value="2">2ª Quinzena</option>
       <option value="M">Mensal</option>
-    </select>
-    <br>
-    <label>De:</label>
-    <input type="date" id="filtroDataInicio">
-    <label>Até:</label>
-    <input type="date" id="filtroDataFim">
-    <br>
+    </select></div>
+    <div><label>De:</label><input type="date" id="filtroDataInicio"></div>
+    <div><label>Até:</label><input type="date" id="filtroDataFim"></div>
+  </div>
+
+  <div class="acoes">
     <button onclick="carregarRegistros()">🔄 Atualizar</button>
+    <button onclick="exportarCSV()">📄 Exportar CSV</button>
   </div>
 
   <div class="resumo" id="resumo"></div>
   <table>
     <thead>
       <tr>
-        <th>Data</th>
-        <th>Nome</th>
-        <th>Função</th>
-        <th>Local</th>
-        <th>Horas</th>
-        <th>Valor (€)</th>
-        <th>Quinzena</th>
+        <th>📅 Data</th>
+        <th>👤 Nome</th>
+        <th>🧹 Função</th>
+        <th>📍 Local</th>
+        <th>⏱️ Horas</th>
+        <th>💰 Valor (€)</th>
+        <th>📆 Quinzena</th>
       </tr>
     </thead>
     <tbody id="tabelaRegistros"></tbody>
   </table>
+
+  <canvas id="graficoHoras"></canvas>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
@@ -79,6 +85,8 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    let chart;
+
     async function carregarRegistros() {
       const snapshot = await getDocs(collection(db, "registros"));
       let registros = [];
@@ -94,52 +102,92 @@
       const tabela = document.getElementById("tabelaRegistros");
       const resumo = document.getElementById("resumo");
       tabela.innerHTML = "";
+
       let totalHoras = 0;
       let totalValor = 0;
+      let horasPorFuncionario = {};
 
-      registros
-        .sort((a, b) => new Date(a.data) - new Date(b.data))
-        .forEach(r => {
-          const nome = (r.nome || "").toLowerCase();
-          const funcao = r.funcao || "";
-          const local = r.local || "";
-          const quinzena = r.quinzena || "";
-          const horas = parseFloat(r.horas) || 0;
-          const valor = parseFloat(r.valorHora) || 0;
-          const data = r.data || "";
+      const filtrados = registros.filter(r => {
+        const nome = (r.nome || '').toLowerCase();
+        const funcao = r.funcao || '';
+        const local = r.local || '';
+        const quinzena = r.quinzena || '';
+        const data = r.data || '';
 
-          // Filtros aplicados
-          const passa =
-            (!nomeFiltro || nome.includes(nomeFiltro)) &&
-            (!funcaoFiltro || funcao === funcaoFiltro) &&
-            (!localFiltro || local === localFiltro) &&
-            (!quinzenaFiltro || quinzena === quinzenaFiltro) &&
-            (!dataInicio || new Date(data) >= new Date(dataInicio)) &&
-            (!dataFim || new Date(data) <= new Date(dataFim));
+        const dataValida = (!dataInicio || new Date(data) >= new Date(dataInicio)) &&
+                           (!dataFim || new Date(data) <= new Date(dataFim));
 
-          if (!passa) return;
+        return (!nomeFiltro || nome.includes(nomeFiltro)) &&
+               (!funcaoFiltro || funcao === funcaoFiltro) &&
+               (!localFiltro || local === localFiltro) &&
+               (!quinzenaFiltro || quinzena === quinzenaFiltro) &&
+               dataValida;
+      });
 
-          const linha = document.createElement("tr");
-          linha.innerHTML = `
-            <td>${formatarData(data)}</td>
-            <td>${r.nome || "-"}</td>
-            <td>${funcao}</td>
-            <td>${local}</td>
-            <td>${horas}</td>
-            <td>€${(horas * valor).toFixed(2)}</td>
-            <td>${quinzena}</td>
-          `;
-          totalHoras += horas;
-          totalValor += horas * valor;
-          tabela.appendChild(linha);
-        });
+      filtrados.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(r => {
+        const horas = parseFloat(r.horas) || 0;
+        const valor = parseFloat(r.valorHora) || 0;
+        const nome = r.nome || "(sem nome)";
 
-      resumo.innerHTML = `Total de horas: ${totalHoras}h | Valor total: €${totalValor.toFixed(2)}`;
+        const linha = document.createElement("tr");
+        linha.innerHTML = `
+          <td>${formatarData(r.data)}</td>
+          <td>${nome}</td>
+          <td>${r.funcao}</td>
+          <td>${r.local}</td>
+          <td>${horas}</td>
+          <td>€${(horas * valor).toFixed(2)}</td>
+          <td>${r.quinzena}</td>
+        `;
+        tabela.appendChild(linha);
+
+        totalHoras += horas;
+        totalValor += horas * valor;
+        horasPorFuncionario[nome] = (horasPorFuncionario[nome] || 0) + horas;
+      });
+
+      resumo.textContent = `Total de horas: ${totalHoras}h | Valor total: €${totalValor.toFixed(2)}`;
+      desenharGrafico(horasPorFuncionario);
     }
 
     function formatarData(iso) {
       const d = new Date(iso);
       return d.toLocaleDateString("pt-BR");
+    }
+
+    function exportarCSV() {
+      const linhas = [["Data", "Nome", "Funcao", "Local", "Horas", "Valor (€)", "Quinzena"]];
+      document.querySelectorAll("#tabelaRegistros tr").forEach(tr => {
+        const cells = Array.from(tr.children).map(td => td.textContent);
+        linhas.push(cells);
+      });
+
+      const csv = linhas.map(l => l.join(",")).join("\n");
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "registros.csv";
+      link.click();
+    }
+
+    function desenharGrafico(dados) {
+      const ctx = document.getElementById("graficoHoras").getContext("2d");
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: Object.keys(dados),
+          datasets: [{
+            label: "Horas por Funcionário",
+            data: Object.values(dados)
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
     }
 
     carregarRegistros();
