@@ -73,51 +73,53 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    async function carregarRegistros() {
-      const snapshot = await getDocs(collection(db, "registros"));
-      let registros = [];
-      snapshot.forEach(doc => registros.push(doc.data()));
+ async function carregarRegistros() {
+  const snapshot = await getDocs(collection(db, "registros"));
+  let registros = [];
+  snapshot.forEach(doc => registros.push(doc.data()));
 
-      const nomeFiltro = document.getElementById("filtroNome").value.toLowerCase();
-      const funcaoFiltro = document.getElementById("filtroFuncao").value;
-      const localFiltro = document.getElementById("filtroLocal").value;
-      const quinzenaFiltro = document.getElementById("filtroQuinzena").value;
+  const nomeFiltro = document.getElementById("filtroNome").value.trim().toLowerCase();
+  const funcaoFiltro = document.getElementById("filtroFuncao").value;
+  const localFiltro = document.getElementById("filtroLocal").value;
+  const quinzenaFiltro = document.getElementById("filtroQuinzena").value;
 
-      const tabela = document.getElementById("tabelaRegistros");
-      const resumo = document.getElementById("resumo");
-      tabela.innerHTML = "";
-      let totalHoras = 0;
-      let totalValor = 0;
+  const tabela = document.getElementById("tabelaRegistros");
+  const resumo = document.getElementById("resumo");
+  tabela.innerHTML = "";
+  let totalHoras = 0;
+  let totalValor = 0;
 
-      registros
-        .filter(r =>
-          (!nomeFiltro || r.nome?.toLowerCase().includes(nomeFiltro)) &&
-          (!funcaoFiltro || r.funcao === funcaoFiltro) &&
-          (!localFiltro || r.local === localFiltro) &&
-          (!quinzenaFiltro || r.quinzena === quinzenaFiltro)
-        )
-        .sort((a, b) => new Date(a.data) - new Date(b.data))
-        .forEach(r => {
-          const linha = document.createElement("tr");
-          linha.innerHTML = `
-            <td>${formatarData(r.data)}</td>
-            <td>${r.nome}</td>
-            <td>${r.funcao}</td>
-            <td>${r.local}</td>
-            <td>${r.horas}</td>
-            <td>€${(r.horas * r.valorHora).toFixed(2)}</td>
-            <td>${r.quinzena}</td>
-          `;
-          const horas = parseFloat(r.horas);
-const valor = parseFloat(r.valorHora);
-totalHoras += horas;
-totalValor += horas * valor;
+  registros
+    .filter(r => {
+      const nomeValido = !nomeFiltro || (r.nome && r.nome.toLowerCase().includes(nomeFiltro));
+      const funcaoValida = !funcaoFiltro || r.funcao === funcaoFiltro;
+      const localValido = !localFiltro || r.local === localFiltro;
+      const quinzenaValida = !quinzenaFiltro || r.quinzena === quinzenaFiltro;
+      return nomeValido && funcaoValida && localValido && quinzenaValida;
+    })
+    .sort((a, b) => new Date(a.data) - new Date(b.data))
+    .forEach(r => {
+      const horas = parseFloat(r.horas) || 0;
+      const valor = parseFloat(r.valorHora) || 0;
 
-          tabela.appendChild(linha);
-        });
+      const linha = document.createElement("tr");
+      linha.innerHTML = `
+        <td>${formatarData(r.data)}</td>
+        <td>${r.nome || "-"}</td>
+        <td>${r.funcao || "-"}</td>
+        <td>${r.local || "-"}</td>
+        <td>${horas}</td>
+        <td>€${(horas * valor).toFixed(2)}</td>
+        <td>${r.quinzena || "-"}</td>
+      `;
+      totalHoras += horas;
+      totalValor += horas * valor;
+      tabela.appendChild(linha);
+    });
 
-      resumo.innerHTML = `Total de horas: ${totalHoras}h | Valor total: €${totalValor.toFixed(2)}`;
-    }
+  resumo.innerHTML = `Total de horas: ${totalHoras}h | Valor total: €${totalValor.toFixed(2)}`;
+}
+
 
     function formatarData(iso) {
       const d = new Date(iso);
