@@ -62,7 +62,7 @@
   <div id="nomeModal" class="modal">
     <div class="modal-content">
       <label for="inputNome">Digite seu nome e sobrenome:</label>
-      <input type="text" id="inputNome" placeholder="Ja tomou agua hoje ?" />
+      <input type="text" id="inputNome" placeholder="Já tomou água hoje?" />
       <div class="botoes-modal">
         <button onclick="confirmarNome()">Confirmar</button>
         <button onclick="fecharModal()">Retornar</button>
@@ -155,6 +155,7 @@
     document.getElementById("horas").value = "";
     document.getElementById("local").value = "";
   }
+  window.adicionarRegistro = adicionarRegistro;
 
   function mostrarRegistros() {
     const div = document.getElementById("listaRegistros");
@@ -233,14 +234,17 @@
     document.getElementById("relatorio").style.display = "block";
     document.getElementById("btnEnviar").style.display = "inline-block";
   }
+  window.encerrarCiclo = encerrarCiclo;
 
   function abrirModal() {
     document.getElementById("nomeModal").style.display = "flex";
   }
+  window.abrirModal = abrirModal;
 
   function fecharModal() {
     document.getElementById("nomeModal").style.display = "none";
   }
+  window.fecharModal = fecharModal;
 
   async function confirmarNome() {
     const nome = document.getElementById("inputNome").value.trim();
@@ -277,7 +281,7 @@
     for (let funcao in resumo) {
       const r = resumo[funcao];
       corpoTexto += `${funcao}: ${r.horas}h x €${r.valorHora.toFixed(2)} = €${r.total.toFixed(2)}\n`;
-    });
+    }
 
     corpoTexto += `\nTotal geral: €${totalGeral.toFixed(2)}`;
 
@@ -294,11 +298,13 @@
     document.getElementById("btnEnviar").style.display = "none";
     document.getElementById("quinzena").value = "";
   }
+  window.confirmarNome = confirmarNome;
 
   function excluirRegistro(index) {
     registros.splice(index, 1);
     salvarRegistros();
   }
+  window.excluirRegistro = excluirRegistro;
 
   mostrarRegistros();
 </script>
