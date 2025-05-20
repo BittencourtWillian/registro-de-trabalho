@@ -2,16 +2,14 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Registro de Trabalho</title>
   <link rel="stylesheet" href="style.css" />
-  <script defer src="script.js"></script>
 </head>
 <body>
-  <!-- Título -->
   <h2 class="centralizado">Registro de Trabalho</h2>
 
-  <!-- Campo Local -->
+  <!-- Local de Trabalho -->
   <div>
     <label>Local de Trabalho</label>
     <select id="local">
@@ -24,22 +22,21 @@
     </select>
   </div>
 
-  <!-- Data -->
-<div class="linha-dupla">
-  <div>
-    <label>Data</label>
-    <input type="date" id="data" />
+  <!-- Data e Função -->
+  <div class="linha-dupla">
+    <div>
+      <label>Data</label>
+      <input type="date" id="data" />
+    </div>
+    <div>
+      <label>Função</label>
+      <select id="funcao">
+        <option value="">Selecione</option>
+        <option value="Cleaner">Cleaner</option>
+        <option value="Supervisor">Supervisor</option>
+      </select>
+    </div>
   </div>
-  <div>
-    <label>Função</label>
-    <select id="funcao">
-      <option value="">Selecione</option>
-      <option value="Cleaner">Cleaner</option>
-      <option value="Supervisor">Supervisor</option>
-    </select>
-  </div>
-</div>
-
 
   <!-- Horas -->
   <div>
@@ -47,14 +44,11 @@
     <input inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="horas" />
   </div>
 
-  <!-- Botão Adicionar -->
   <button class="btn-principal" onclick="adicionarRegistro()">➕ Adicionar Registro</button>
 
-  <!-- Registros -->
   <h3 class="centralizado">Registros</h3>
   <div id="listaRegistros"></div>
 
-  <!-- Encerrar Ciclo -->
   <h3 class="centralizado">Encerrar Ciclo</h3>
   <label>Fechamento:</label>
   <select id="quinzena">
@@ -65,13 +59,9 @@
   </select>
   <button class="btn-principal" onclick="encerrarCiclo()">📄 Gerar Relatório</button>
 
-  <!-- Relatório -->
   <div id="relatorio" class="relatorio" style="display:none;"></div>
-
-  <!-- Botão Enviar -->
   <button id="btnEnviar" class="btn-principal" style="display:none;" onclick="abrirModal()">📤 Enviar para pagamento</button>
 
-  <!-- Modal personalizado -->
   <div id="nomeModal" class="modal">
     <div class="modal-content">
       <label for="inputNome">Digite seu nome e sobrenome:</label>
@@ -83,10 +73,49 @@
     </div>
   </div>
 
-  <!-- Rodapé com botão atualizar -->
   <footer class="rodape">
     <button onclick="location.reload()" class="btn-atualizar">🔄 Atualizar App</button>
   </footer>
+
+  <!-- Firebase e JS principal -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDBZvkl_LNF2dknJMDnz1ADUs367Asgaoo",
+      authDomain: "marvel-cleaning.firebaseapp.com",
+      projectId: "marvel-cleaning",
+      storageBucket: "marvel-cleaning.firebasestorage.app",
+      messagingSenderId: "1019742825233",
+      appId: "1:1019742825233:web:750e2037636e28af617ab0",
+      measurementId: "G-7032Q802JY"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.salvarRegistrosNoFirestore = async function (registros, nome, quinzena) {
+      try {
+        for (const r of registros) {
+          await addDoc(collection(db, "registros"), {
+            nome,
+            data: r.data,
+            local: r.local,
+            funcao: r.funcao,
+            horas: r.horas,
+            valorHora: r.valor,
+            quinzena,
+            enviadoEm: new Date().toISOString()
+          });
+        }
+        console.log("Registros enviados para o Firestore!");
+      } catch (err) {
+        console.error("Erro ao salvar no Firestore:", err);
+      }
+    };
+  </script>
+
+  <script src="script.js"></script>
 </body>
 </html>
-
