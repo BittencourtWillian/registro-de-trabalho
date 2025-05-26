@@ -7,16 +7,66 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { padding: 20px; background-color: #f8f9fa; font-family: sans-serif; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
-    th { background: #eee; }
-    .filtros { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
-    .filtros div { display: flex; flex-direction: column; }
-    .resumo { margin-top: 20px; font-weight: bold; }
-    .acoes { margin-top: 20px; display: flex; gap: 10px; align-items: center; }
-    canvas { margin-top: 40px; max-width: 800px; }
-  </style>
+  body {
+    padding: 20px;
+    background-color: #f8f9fa;
+    font-family: sans-serif;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    table-layout: auto;
+  }
+
+  th, td {
+    padding: 8px;
+    border: 1px solid #ccc;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  th {
+    background: #eee;
+  }
+
+  td:nth-child(2), th:nth-child(2) {
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .filtros div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .resumo {
+    margin-top: 20px;
+    font-weight: bold;
+  }
+
+  .acoes {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  canvas {
+    margin-top: 40px;
+    max-width: 800px;
+  }
+</style>
+
 </head>
 <body>
   <h2>📊 Dashboard - Registros de Funcionários</h2>
