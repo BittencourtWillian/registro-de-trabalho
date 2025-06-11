@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Work Log Dashboard (Test Environment)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      max-width: none !important;
+      margin: 0;
+      padding: 20px;
+      background-image: url('https://images.unsplash.com/photo-1581579185169-8437c55b94fd?auto=format&fit=crop&w=1600&q=60');
+      background-size: cover;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      font-family: 'Segoe UI', sans-serif;
+      color: #333;
+    }
+    .overlay {
+      background: rgba(255,255,255,0.95);
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .logo {
+      width: 80px;
+      display: block;
+      margin: 0 auto 10px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      gap: 16px;
+    }
+    .filters div {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    input, select {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    .actions {
+      margin: 20px 0;
+      display: flex;
+      gap: 12px;
+    }
+    .actions button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 4px;
+      background: #007bff;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .actions button:hover {
+      background: #0056b3;
+    }
+    .summary {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    .table-container {
+      overflow-x: auto;
+      margin: 20px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      background: #f5f7fa;
+      font-weight: 600;
+    }
+    h3.graph-title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin: 30px 0 10px;
+    }
+    canvas#graficoHoras {
+      display: block;
+      margin: 0 auto 40px;
+      width: 100%;
+      max-width: 800px;
+      height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <img src="cleaner.png" alt="Company Logo" class="logo" />
+    <h2>📊 Dashboard - Work Log (Test)</h2>
+
+    <div class="filters">
+      <div><label>Name</label><input type="text" id="filtroNome" placeholder="Filter by name"></div>
+      <div><label>Role</label><select id="filtroFuncao"><option value="">All</option><option>Cleaner</option><option>Supervisor</option><option>Laundry</option></select></div>
+      <div><label>Location</label><select id="filtroLocal"><option value="">All</option><option>Santry</option><option>East Wall</option><option>Lesson</option><option>St. Mary</option><option>Navan</option></select></div>
+      <div><label>Period</label><select id="filtroQuinzena"><option value="">All</option><option value="1">1st half (1-15)</option><option value="2">2nd half (16-31)</option><option value="M">Full month</option></select></div>
+      <div><label>From</label><input type="date" id="filtroDataInicio"></div>
+      <div><label>To</label><input type="date" id="filtroDataFim"></div>
+    </div>
+
+    <div class="actions">
+      <button onclick="carregarRegistros()">🔄 Refresh</button>
+      <button onclick="exportarCSV()">📄 Export CSV</button>
+    </div>
+
+    <div class="summary" id="resumo"></div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Name</th><th>Role</th><th>Location</th><th>Hours</th><th>Value (€)</th></tr>
+        </thead>
+        <tbody id="tabelaRegistros"></tbody>
+      </table>
+    </div>
+
+    <h3 class="graph-title">Total Hours by Employee</h3>
+    <canvas id="graficoHoras"></canvas>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA_unL-ObfYrhswlgJK9BZgDtENRqyeNqk",
+      authDomain: "registro-teste.firebaseapp.com",
+      projectId: "registro-teste",
+      storageBucket: "registro-teste.appspot.com",
+      messagingSenderId: "380295278839",
+      appId: "1:380295278839:web:a6bb2e6e74e75972f363f2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let chart;
+
+    async function carregarRegistros() {
+      try {
+        const snapshot = await getDocs(collection(db, "registros"));
+        const registros = [];
+        snapshot.forEach(doc => registros.push(doc.data()));
+
+        const nomeFiltro = document.getElementById("filtroNome").value.toLowerCase();
+        const funcaoFiltro = document.getElementById("filtroFuncao").value;
+        const localFiltro = document.getElementById("filtroLocal").value;
+        const quinzenaFiltro = document.getElementById("filtroQuinzena").value;
+        const dataInicio = document.getElementById("filtroDataInicio").value;
+        const dataFim = document.getElementById("filtroDataFim").value;
+
+        const tabela = document.getElementById("tabelaRegistros");
+        tabela.innerHTML = "";
+
+        let totalHoras = 0, totalValor = 0;
+        const horasPorUser = {};
+
+        const filtrados = registros.filter(r => {
+          const nome = (r.name || r.nome || "").toLowerCase();
+          const funcao = r.role || r.funcao || "";
+          const local = r.location || r.local || "";
+          const quinzena = r.period || r.quinzena || "";
+          const data = r.date || r.data || "";
+          let valido = true;
+
+          if (nomeFiltro && !nome.includes(nomeFiltro)) valido = false;
+          if (funcaoFiltro && funcao !== funcaoFiltro) valido = false;
+          if (localFiltro && local !== localFiltro) valido = false;
+          if (quinzenaFiltro && quinzena !== quinzenaFiltro) valido = false;
+          if ((dataInicio || dataFim) && data) {
+            const dataObj = new Date(data);
+            if (dataInicio && dataObj < new Date(dataInicio)) valido = false;
+            if (dataFim && dataObj > new Date(dataFim)) valido = false;
+          }
+          return valido;
+        });
+
+        filtrados.sort((a, b) => new Date(a.date || a.data) - new Date(b.date || b.data))
+          .forEach(r => {
+            const nome = r.name || r.nome || "";
+            const role = r.role || r.funcao || "";
+            const location = r.location || r.local || "";
+            const hrs = parseFloat(r.hours || r.horas) || 0;
+            const rate = parseFloat(r.rate || r.valorHora) || 0;
+            const val = (hrs * rate).toFixed(2);
+            const dataFormatada = new Date(r.date || r.data).toLocaleDateString("en-GB");
+
+            totalHoras += hrs;
+            totalValor += parseFloat(val);
+            horasPorUser[nome] = (horasPorUser[nome] || 0) + hrs;
+
+            tabela.innerHTML += `<tr>
+              <td>${dataFormatada}</td>
+              <td>${nome}</td>
+              <td>${role}</td>
+              <td>${location}</td>
+              <td>${hrs.toFixed(2)}</td>
+              <td>€${val}</td>
+            </tr>`;
+          });
+
+        document.getElementById("resumo").textContent = 
+          `Total Hours: ${totalHoras.toFixed(2)} | Total Value: €${totalValor.toFixed(2)}`;
+
+        drawChart(horasPorUser);
+      } catch (err) {
+        console.error("Erro ao carregar registros:", err);
+        alert("Erro ao carregar registros. Verifique o console.");
+      }
+    }
+
+    function drawChart(data) {
+      const ctx = document.getElementById("graficoHoras").getContext("2d");
+      if (chart) chart.destroy();
+
+      const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+      const labels = entries.map(e => e[0]);
+      const values = entries.map(e => e[1]);
+
+      chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: "rgba(54, 162, 235, 0.5)",
+            borderColor: "rgba(54, 162, 235, 1)",
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: "Hours"
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: "Employees"
+              },
+              ticks: {
+                maxRotation: 45,
+                minRotation: 0
+              }
+            }
+          }
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      carregarRegistros();
+      ['filtroNome','filtroFuncao','filtroLocal','filtroQuinzena','filtroDataInicio','filtroDataFim']
+        .forEach(id => document.getElementById(id)
+          .addEventListener(id === 'filtroNome' ? 'input' : 'change', carregarRegistros));
+    });
+
+    window.carregarRegistros = carregarRegistros;
+    window.exportarCSV = () => { alert("CSV export not implemented"); };
+  </script>
+</body>
+</html>
