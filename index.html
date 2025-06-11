@@ -1,312 +1,352 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registro de Trabalho</title>
+  <title>Work Log</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background-image: url('https://images.unsplash.com/photo-1581579185169-8437c55b94fd?auto=format&fit=crop&w=1600&q=60');
+      background-size: cover;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+    }
+    .overlay {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .logo {
+      width: 100px;
+      display: block;
+      margin: 0 auto 10px auto;
+    }
+  </style>
 </head>
 <body>
-  <h2 class="centralizado">Registro de Trabalho</h2>
+  <div class="overlay">
+    <img src="cleaner.png" alt="Company Logo" class="logo">
+    <h2 class="centralizado">Work Log</h2>
+    <div id="userDisplay" class="centralizado" style="margin-bottom: 10px; font-style: italic;"></div>
 
-  <div>
-    <label>Local de Trabalho</label>
-    <select id="local">
-      <option value="">Selecione</option>
-      <option value="Santry">Santry</option>
-      <option value="East Wall">East Wall</option>
-      <option value="Lesson">Lesson</option>
-      <option value="St. Mary">St. Mary</option>
-      <option value="Navan">Navan</option>
-    </select>
-  </div>
-
-  <div class="linha-dupla">
-    <div>
-      <label>Data</label>
-      <input type="date" id="data" />
-    </div>
-    <div>
-      <label>Função</label>
-      <select id="funcao">
-        <option value="">Selecione</option>
-        <option value="Cleaner">Cleaner</option>
-        <option value="Supervisor">Supervisor</option>
-      </select>
-    </div>
-  </div>
-
-  <div>
-    <label>Horas trabalhadas</label>
-    <input inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="horas" />
-  </div>
-
-  <button class="btn-principal" onclick="adicionarRegistro()">➕ Adicionar Registro</button>
-
-  <h3 class="centralizado">Registros</h3>
-  <div id="listaRegistros"></div>
-
-  <h3 class="centralizado">Encerrar Ciclo</h3>
-  <label>Fechamento:</label>
-  <select id="quinzena">
-    <option value="">Selecione</option>
-    <option value="1">1ª quinzena (1 a 15)</option>
-    <option value="2">2ª quinzena (16 a 31)</option>
-    <option value="M">Mensal (1 a 31)</option>
-  </select>
-  <button class="btn-principal" onclick="encerrarCiclo()">📄 Gerar Relatório</button>
-
-  <div id="relatorio" class="relatorio" style="display:none;"></div>
-  <button id="btnEnviar" class="btn-principal" style="display:none;" onclick="abrirModal()">📤 Enviar para pagamento</button>
-
-  <div id="nomeModal" class="modal">
-    <div class="modal-content">
-      <label for="inputNome">Digite seu nome e sobrenome:</label>
-      <input type="text" id="inputNome" placeholder="Já tomou água hoje?" />
-      <div class="botoes-modal">
-        <button onclick="confirmarNome()">Confirmar</button>
-        <button onclick="fecharModal()">Retornar</button>
+    <div id="nameModal" class="modal">
+      <div class="modal-content">
+        <label for="inputName">Please enter your full name:</label>
+        <input type="text" id="inputName" placeholder="Your full name" />
+        <div class="botoes-modal">
+          <button onclick="confirmName()">Confirm</button>
+        </div>
       </div>
     </div>
+
+    <div>
+      <label>Work Location</label>
+      <select id="location">
+        <option value="">Select</option>
+        <option value="Santry">Santry</option>
+        <option value="East Wall">East Wall</option>
+        <option value="Lesson">Lesson</option>
+        <option value="St. Mary">St. Mary</option>
+        <option value="Navan">Navan</option>
+      </select>
+    </div>
+
+    <div class="linha-dupla">
+      <div>
+        <label>Date</label>
+        <input type="date" id="date" />
+      </div>
+      <div>
+        <label>Role</label>
+        <select id="role">
+          <option value="">Select</option>
+          <option value="Cleaner">Cleaner</option>
+          <option value="Supervisor">Supervisor</option>
+          <option value="Laundry">Laundry</option>
+          <option value="Supervisor Laundry">Supervisor Laundry</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label>Worked Hours</label>
+      <input inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="hours" />
+    </div>
+
+    <button class="btn-principal" onclick="addRecord()">➕ Add Record</button>
+
+    <h3 class="centralizado">Records</h3>
+    <div id="recordList"></div>
+
+    <h3 class="centralizado">End of Cycle</h3>
+    <label>Cycle:</label>
+    <select id="period">
+      <option value="">Select</option>
+      <option value="1">1st half (1 to 15)</option>
+      <option value="2">2nd half (16 to 31)</option>
+      <option value="M">Full month (1 to 31)</option>
+    </select>
+    <button class="btn-principal" onclick="generateReport()">📄 Generate Report</button>
+
+    <div id="report" class="relatorio" style="display:none;"></div>
+    <button id="btnSend" class="btn-principal" style="display:none;" onclick="sendEmail()">📤 Send for Payment</button>
+
+    <footer class="rodape">
+      <button onclick="location.reload()" class="btn-atualizar">🔄 Refresh App</button>
+      <button onclick="changeUser()" class="btn-atualizar">👤 Change User</button>
+    </footer>
   </div>
 
-  <footer class="rodape">
-    <button onclick="location.reload()" class="btn-atualizar">🔄 Atualizar App</button>
-  </footer>
-
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDBZvkl_LNF2dknJMDnz1ADUs367Asgaoo",
-    authDomain: "marvel-cleaning.firebaseapp.com",
-    projectId: "marvel-cleaning",
-    storageBucket: "marvel-cleaning.firebasestorage.app",
-    messagingSenderId: "1019742825233",
-    appId: "1:1019742825233:web:750e2037636e28af617ab0",
-    measurementId: "G-7032Q802JY"
-  };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const firebaseConfig = {
+  apiKey: "AIzaSyA_unL-ObfYrhswlgJK9BZgDtENRqyeNqk",
+  authDomain: "registro-teste.firebaseapp.com",
+  projectId: "registro-teste",
+  storageBucket: "registro-teste.appspot.com",
+  messagingSenderId: "380295278839",
+  appId: "1:380295278839:web:a6bb2e6e74e75972f363f2"
+};
 
-  window.salvarRegistrosNoFirestore = async function (registros, nome, quinzena) {
-    try {
-      for (const r of registros) {
-        await addDoc(collection(db, "registros"), {
-          nome,
-          data: r.data,
-          local: r.local,
-          funcao: r.funcao,
-          horas: r.horas,
-          valorHora: r.valor,
-          quinzena,
-          enviadoEm: new Date().toISOString()
-        });
-      }
-      console.log("Registros enviados para o Firestore!");
-    } catch (err) {
-      console.error("Erro ao salvar no Firestore:", err);
-    }
-  };
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
 
-  const APP_VERSION = "1.0.6";
-  const storedVersion = localStorage.getItem("app_version");
-  if (storedVersion !== APP_VERSION) {
-    localStorage.setItem("app_version", APP_VERSION);
-    location.reload(true);
+
+let records = JSON.parse(localStorage.getItem("records")) || [];
+const rates = {
+  "Cleaner": 13.5,
+  "Supervisor": 15,
+  "Laundry": 13.5,
+  "Supervisor Laundry": 14
+};
+
+const userName = localStorage.getItem("userName");
+if (!userName) {
+  document.getElementById("nameModal").style.display = "flex";
+} else {
+  document.getElementById("userDisplay").textContent = `User: ${userName}`;
+}
+
+window.confirmName = function () {
+  const input = document.getElementById("inputName").value.trim();
+  if (!input || input.length < 3) {
+    alert("Please enter a valid name.");
+    return;
+  }
+  localStorage.setItem("userName", input);
+  document.getElementById("nameModal").style.display = "none";
+  document.getElementById("userDisplay").textContent = `User: ${input}`;
+};
+
+window.changeUser = function () {
+  localStorage.removeItem("userName");
+  location.reload();
+};
+
+window.addRecord = async function () {
+  const dateStr = document.getElementById("date").value;
+  const role = document.getElementById("role").value;
+  const location = document.getElementById("location").value;
+  const hours = parseFloat(document.getElementById("hours").value);
+  const name = localStorage.getItem("userName");
+
+  if (!dateStr || !role || !location || isNaN(hours) || !name) {
+    alert("Please complete all fields correctly.");
+    return;
   }
 
-  let registros = JSON.parse(localStorage.getItem("registros")) || [];
-  let relatorioAtual = "";
-  let quinzenaAtual = "";
+  const date = new Date(dateStr);
+  const day = date.getDate();
+  const rate = rates[role];
 
-  const valores = {
-    "Cleaner": 13.5,
-    "Supervisor": 15
-  };
-
-  function salvarRegistros() {
-    localStorage.setItem("registros", JSON.stringify(registros));
-    mostrarRegistros();
-  }
-
-  function adicionarRegistro() {
-    const dataStr = document.getElementById("data").value;
-    const funcao = document.getElementById("funcao").value;
-    const local = document.getElementById("local").value;
-    const horas = parseFloat(document.getElementById("horas").value);
-
-    if (!dataStr || !funcao || !local || isNaN(horas)) {
-      alert("Preencha todos os campos corretamente!");
-      return;
-    }
-
-    const data = new Date(dataStr);
-    const dia = data.getDate();
-    const valor = valores[funcao];
-
-    registros.push({ dia, funcao, horas, valor, data: dataStr, local });
-    salvarRegistros();
-
-    document.getElementById("data").value = "";
-    document.getElementById("funcao").value = "";
-    document.getElementById("horas").value = "";
-    document.getElementById("local").value = "";
-  }
-  window.adicionarRegistro = adicionarRegistro;
-
-  function mostrarRegistros() {
-    const div = document.getElementById("listaRegistros");
-    div.innerHTML = "";
-
-    registros.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach((r, index) => {
-      const icone = r.funcao === "Supervisor" ? "💼" : "🧹";
-      const item = document.createElement("div");
-      item.className = "registro";
-      item.innerHTML = `
-        <div><strong>${r.data}</strong><br>
-        📍 ${r.local} | ${icone} ${r.funcao} | ⏱️ ${r.horas}h</div>
-        <button onclick="excluirRegistro(${index})">Excluir</button>
-      `;
-      div.appendChild(item);
-    });
-  }
-
-  function encerrarCiclo() {
-    const q = document.getElementById("quinzena").value;
-    if (!q) {
-      alert("Selecione uma quinzena.");
-      return;
-    }
-
-    let inicio, fim, titulo;
-    if (q === "1") { inicio = 1; fim = 15; titulo = "1ª Quinzena (1-15)"; }
-    else if (q === "2") { inicio = 16; fim = 31; titulo = "2ª Quinzena (16-31)"; }
-    else { inicio = 1; fim = 31; titulo = "Mensal (1-31)"; }
-
-    const registrosFiltrados = registros.filter(r => r.dia >= inicio && r.dia <= fim);
-    if (registrosFiltrados.length === 0) {
-      alert("Nenhum registro nessa quinzena.");
-      return;
-    }
-
-    let tabela = `<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;text-align:left;">
-      <tr><th>Data</th><th>Local</th><th>Função</th><th>Horas</th></tr>`;
-
-    registrosFiltrados.forEach(r => {
-      const [ano, mes, dia] = r.data.split("-");
-      tabela += `<tr>
-        <td>${dia}/${mes}/${ano}</td>
-        <td>${r.local}</td>
-        <td>${r.funcao}</td>
-        <td>${r.horas} Horas</td>
-      </tr>`;
+  try {
+    const docRef = await addDoc(collection(db, "registros"), {
+      name,
+      date: dateStr,
+      day,
+      role,
+      location,
+      hours,
+      rate,
+      sentAt: new Date().toISOString()
     });
 
-    tabela += `</table>`;
+    records.push({ date: dateStr, role, location, hours, rate, day, id: docRef.id });
+    localStorage.setItem("records", JSON.stringify(records));
+    showRecords();
+    
+    // Limpa os campos após sucesso
+    document.getElementById("date").value = "";
+    document.getElementById("role").value = "";
+    document.getElementById("location").value = "";
+    document.getElementById("hours").value = "";
 
-    let resumo = {};
-    let totalGeral = 0;
-
-    registrosFiltrados.forEach(r => {
-      if (!resumo[r.funcao]) resumo[r.funcao] = { horas: 0, total: 0, valorHora: r.valor };
-      resumo[r.funcao].horas += r.horas;
-      resumo[r.funcao].total += r.horas * r.valor;
-      totalGeral += r.horas * r.valor;
+  } catch (err) {
+    console.error("Erro detalhado no Firestore:", {
+      code: err.code,
+      message: err.message,
+      stack: err.stack
     });
-
-    let totais = `<br><b>Resumo por função:</b><br>`;
-    for (let funcao in resumo) {
-      const r = resumo[funcao];
-      totais += `${funcao}: ${r.horas}h x €${r.valorHora.toFixed(2)} = €${r.total.toFixed(2)}<br>`;
-    }
-
-    totais += `<br><span style="background: yellow; font-weight: bold;">Total geral: €${totalGeral.toFixed(2)}</span>`;
-
-    const relatorioFinal = `Relatório de Pagamento - ${titulo}<br><br>${tabela}${totais}`;
-
-    relatorioAtual = relatorioFinal;
-    quinzenaAtual = q;
-
-    document.getElementById("relatorio").innerHTML = relatorioFinal;
-    document.getElementById("relatorio").style.display = "block";
-    document.getElementById("btnEnviar").style.display = "inline-block";
+    
+    alert(`Falha ao salvar os dados:\n\nCódigo: ${err.code}\n\nMensagem: ${err.message}`);
+    
+    // Mantém os dados preenchidos para o usuário corrigir
+    document.getElementById("date").value = dateStr;
+    document.getElementById("role").value = role;
+    document.getElementById("location").value = location;
+    document.getElementById("hours").value = hours;
   }
-  window.encerrarCiclo = encerrarCiclo;
+};
 
-  function abrirModal() {
-    document.getElementById("nomeModal").style.display = "flex";
+window.deleteRecord = async function (index) {
+  const record = records[index];
+  if (record.id) {
+    await deleteDoc(doc(db, "registros", record.id));
   }
-  window.abrirModal = abrirModal;
+  records.splice(index, 1);
+  localStorage.setItem("records", JSON.stringify(records));
+  showRecords();
+};
 
-  function fecharModal() {
-    document.getElementById("nomeModal").style.display = "none";
+function showRecords() {
+  const div = document.getElementById("recordList");
+  div.innerHTML = "";
+
+  records.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach((r, index) => {
+    const icon = r.role.includes("Supervisor") ? "💼" : "🧹";
+    const item = document.createElement("div");
+    item.className = "registro";
+    item.innerHTML = `
+      <div><strong>${r.date}</strong><br>
+      📍 ${r.location} | ${icon} ${r.role} | ⏱️ ${r.hours}h</div>
+      <button onclick="deleteRecord(${index})">Delete</button>
+    `;
+    div.appendChild(item);
+  });
+}
+
+window.generateReport = function () {
+  const p = document.getElementById("period").value;
+  if (!p) {
+    alert("Please select a period.");
+    return;
   }
-  window.fecharModal = fecharModal;
 
-  async function confirmarNome() {
-    const nome = document.getElementById("inputNome").value.trim();
-    if (!nome || nome.length < 3) {
-      alert("Nome inválido.");
-      return;
-    }
+  let start = 1, end = 31, label = "Full Month (1-31)";
+  if (p === "1") { start = 1; end = 15; label = "1st Half (1-15)"; }
+  else if (p === "2") { start = 16; end = 31; label = "2nd Half (16-31)"; }
 
-    let inicio, fim, titulo;
-    if (quinzenaAtual === "1") { inicio = 1; fim = 15; titulo = "1ª Quinzena (1-15)"; }
-    else if (quinzenaAtual === "2") { inicio = 16; fim = 31; titulo = "2ª Quinzena (16-31)"; }
-    else { inicio = 1; fim = 31; titulo = "Mensal (1-31)"; }
-
-    const registrosFiltrados = registros.filter(r => r.dia >= inicio && r.dia <= fim);
-    await salvarRegistrosNoFirestore(registrosFiltrados, nome, quinzenaAtual);
-
-    let corpoTexto = `Relatório de Pagamento - ${titulo}\n\nDias trabalhados:\n`;
-    registrosFiltrados.forEach(r => {
-      const [ano, mes, dia] = r.data.split("-");
-      corpoTexto += `${dia}/${mes}/${ano} | ${r.local} | ${r.funcao} | ${r.horas} Horas\n`;
-    });
-
-    let resumo = {};
-    let totalGeral = 0;
-
-    registrosFiltrados.forEach(r => {
-      if (!resumo[r.funcao]) resumo[r.funcao] = { horas: 0, total: 0, valorHora: r.valor };
-      resumo[r.funcao].horas += r.horas;
-      resumo[r.funcao].total += r.horas * r.valor;
-      totalGeral += r.horas * r.valor;
-    });
-
-    corpoTexto += `\nResumo por função:\n`;
-    for (let funcao in resumo) {
-      const r = resumo[funcao];
-      corpoTexto += `${funcao}: ${r.horas}h x €${r.valorHora.toFixed(2)} = €${r.total.toFixed(2)}\n`;
-    }
-
-    corpoTexto += `\nTotal geral: €${totalGeral.toFixed(2)}`;
-
-    const email = "fabiana@marvelcleaningservices.ie";
-    const assunto = encodeURIComponent(`Solicitação de pagamento: ${nome}`);
-    const corpo = encodeURIComponent(corpoTexto);
-    const mailto = `mailto:${email}?subject=${assunto}&body=${corpo}`;
-    window.location.href = mailto;
-
-    fecharModal();
-    registros = registros.filter(r => !(r.dia >= inicio && r.dia <= fim));
-    salvarRegistros();
-    document.getElementById("relatorio").style.display = "none";
-    document.getElementById("btnEnviar").style.display = "none";
-    document.getElementById("quinzena").value = "";
+  const filtered = records.filter(r => r.day >= start && r.day <= end);
+  if (filtered.length === 0) {
+    alert("No records in this period.");
+    return;
   }
-  window.confirmarNome = confirmarNome;
 
-  function excluirRegistro(index) {
-    registros.splice(index, 1);
-    salvarRegistros();
+  let table = `<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;text-align:left;">
+    <tr><th>Date</th><th>Location</th><th>Role</th><th>Hours</th></tr>`;
+
+  filtered.forEach(r => {
+    const [year, month, day] = r.date.split("-");
+    table += `<tr>
+      <td>${day}/${month}/${year}</td>
+      <td>${r.location}</td>
+      <td>${r.role}</td>
+      <td>${r.hours}</td>
+    </tr>`;
+  });
+
+  table += `</table>`;
+
+  let summary = {}, total = 0;
+  filtered.forEach(r => {
+    if (!summary[r.role]) summary[r.role] = { hours: 0, total: 0, rate: r.rate };
+    summary[r.role].hours += r.hours;
+    summary[r.role].total += r.hours * r.rate;
+    total += r.hours * r.rate;
+  });
+
+  let summaryHtml = `<br><b>Summary by Role:</b><br>`;
+  for (let role in summary) {
+    const s = summary[role];
+    summaryHtml += `${role}: ${s.hours}h x €${s.rate.toFixed(2)} = €${s.total.toFixed(2)}<br>`;
   }
-  window.excluirRegistro = excluirRegistro;
+  summaryHtml += `<br><span style="background: yellow; font-weight: bold;">Total: €${total.toFixed(2)}</span>`;
 
-  mostrarRegistros();
+  const finalReport = `Payment Report - ${label}<br><br>${table}${summaryHtml}`;
+
+  document.getElementById("report").innerHTML = finalReport;
+  document.getElementById("report").style.display = "block";
+  document.getElementById("btnSend").style.display = "inline-block";
+};
+
+window.sendEmail = function () {
+  const name = localStorage.getItem("userName");
+  const filtered = records;
+  const monthName = new Date(filtered[0].date).toLocaleString('default', { month: 'long' });
+  const label = document.getElementById("period").selectedOptions[0].text;
+
+  const reportLines = [];
+  reportLines.push(`Payment Report – ${label}`);
+  reportLines.push("----------------------------------\n");
+  reportLines.push("Worked Days:");
+
+  filtered.forEach(r => {
+    const [year, month, day] = r.date.split("-");
+    reportLines.push(`${day}/${month}/${year} | ${r.location} | ${r.role} | ${r.hours} hours`);
+  });
+
+  reportLines.push("\n----------------------------------\n");
+  reportLines.push("Summary by Role:");
+
+  let summary = {}, total = 0;
+  filtered.forEach(r => {
+    if (!summary[r.role]) summary[r.role] = { hours: 0, total: 0, rate: r.rate };
+    summary[r.role].hours += r.hours;
+    summary[r.role].total += r.hours * r.rate;
+    total += r.hours * r.rate;
+  });
+
+  for (let role in summary) {
+    const s = summary[role];
+    reportLines.push(`${role}: ${s.hours}h x €${s.rate.toFixed(2)} = €${s.total.toFixed(2)}`);
+  }
+
+  reportLines.push("\n----------------------------------\n");
+  reportLines.push(`Total: €${total.toFixed(2)}`);
+
+  const subject = encodeURIComponent(`Payment Request ${monthName}: ${name}`);
+  const body = encodeURIComponent(reportLines.join("\n"));
+  const mailto = `mailto:fabiana@marvelcleaningservices.ie?subject=${subject}&body=${body}`;
+  window.location.href = mailto;
+
+  localStorage.removeItem("userName");
+  localStorage.removeItem("records");
+  setTimeout(() => location.reload(), 1000);
+};
+
+showRecords();
+
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('blur', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
 </script>
 </body>
 </html>
