@@ -164,4 +164,18 @@ input,
 select {
   height: 42px;
   line-height: 1.2;
+  
+}
+
+#userDisplay {
+  font-size: 14px;
+  color: #555;
+  margin-top: -10px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-style: italic;
+  opacity: 0.85;
+}
+input, select, textarea {
+  font-size: 16px !important;
 }
