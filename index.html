@@ -3,394 +3,155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Work Log</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Work Log - Versão Atualizada</title>
   <style>
-    body {
-      background-image: url('https://images.unsplash.com/photo-1581579185169-8437c55b94fd?auto=format&fit=crop&w=1600&q=60');
-      background-size: cover;
-      background-attachment: fixed;
-      background-repeat: no-repeat;
-    }
-    .overlay {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 20px;
-      max-width: 700px;
-      margin: auto;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    .logo {
-      width: 100px;
-      display: block;
-      margin: 0 auto 10px auto;
-    }
-    .loading {
-      opacity: 0.7;
-      cursor: not-allowed;
+    /* [Seus estilos atuais aqui] */
+    .debug-info {
+      background: #f0f0f0;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
-  <div class="overlay">
-    <img src="cleaner.png" alt="Company Logo" class="logo">
-    <h2 class="centralizado">Work Log</h2>
-    <div id="userDisplay" class="centralizado" style="margin-bottom: 10px; font-style: italic;"></div>
+  <!-- [Seu HTML atual aqui] -->
 
-    <div id="nameModal" class="modal">
-      <div class="modal-content">
-        <label for="inputName">Please enter your full name:</label>
-        <input type="text" id="inputName" placeholder="Your full name" />
-        <div class="botoes-modal">
-          <button onclick="confirmName()">Confirm</button>
-        </div>
-      </div>
-    </div>
-
-    <div>
-      <label>Work Location</label>
-      <select id="location">
-        <option value="">Select</option>
-        <option value="Santry">Santry</option>
-        <option value="East Wall">East Wall</option>
-        <option value="Lesson">Lesson</option>
-        <option value="St. Mary">St. Mary</option>
-        <option value="Navan">Navan</option>
-      </select>
-    </div>
-
-    <div class="linha-dupla">
-      <div>
-        <label>Date</label>
-        <input type="date" id="date" />
-      </div>
-      <div>
-        <label>Role</label>
-        <select id="role">
-          <option value="">Select</option>
-          <option value="Cleaner">Cleaner</option>
-          <option value="Supervisor">Supervisor</option>
-          <option value="Laundry">Laundry</option>
-          <option value="Supervisor Laundry">Supervisor Laundry</option>
-        </select>
-      </div>
-    </div>
-
-    <div>
-      <label>Worked Hours</label>
-      <input inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="hours" />
-    </div>
-
-    <button class="btn-principal" onclick="addRecord()">➕ Add Record</button>
-
-    <h3 class="centralizado">Records</h3>
-    <div id="recordList"></div>
-
-    <h3 class="centralizado">End of Cycle</h3>
-    <label>Cycle:</label>
-    <select id="period">
-      <option value="">Select</option>
-      <option value="1">1st half (1 to 15)</option>
-      <option value="2">2nd half (16 to 31)</option>
-      <option value="M">Full month (1 to 31)</option>
-    </select>
-    <button class="btn-principal" onclick="generateReport()">📄 Generate Report</button>
-
-    <div id="report" class="relatorio" style="display:none;"></div>
-    <button id="btnSend" class="btn-principal" style="display:none;" onclick="sendEmail()">📤 Send for Payment</button>
-
-    <footer class="rodape">
-      <button onclick="location.reload()" class="btn-atualizar">🔄 Refresh App</button>
-      <button onclick="changeUser()" class="btn-atualizar">👤 Change User</button>
-    </footer>
-  </div>
+  <!-- Adicione este botão no footer -->
+  <footer class="rodape">
+    <!-- [Seus botões atuais] -->
+    <button onclick="forceRefresh()" class="btn-atualizar">🔄 Forçar Atualização</button>
+  </footer>
 
 <script type="module">
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  deleteDoc,
-  doc,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+// [Suas importações do Firebase atuais aqui]
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA_unL-ObfYrhswlgJK9BZgDtENRqyeNqk",
-  authDomain: "registro-teste.firebaseapp.com",
-  projectId: "registro-teste",
-  storageBucket: "registro-teste.appspot.com",
-  messagingSenderId: "380295278839",
-  appId: "1:380295278839:web:a6bb2e6e74e75972f363f2"
-};
+// Versão do App - Atualize sempre que fizer mudanças
+const APP_VERSION = "2.2.0";
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-let records = JSON.parse(localStorage.getItem("records")) || [];
-const rates = {
-  "Cleaner": 13.5,
-  "Supervisor": 15,
-  "Laundry": 13.5,
-  "Supervisor Laundry": 14
-};
-
-const userName = localStorage.getItem("userName");
-if (!userName) {
-  document.getElementById("nameModal").style.display = "flex";
-} else {
-  document.getElementById("userDisplay").textContent = `User: ${userName}`;
-}
-
-window.confirmName = function () {
-  const input = document.getElementById("inputName").value.trim();
-  if (!input || input.length < 3) {
-    alert("Please enter a valid name.");
-    return;
-  }
-  localStorage.setItem("userName", input);
-  document.getElementById("nameModal").style.display = "none";
-  document.getElementById("userDisplay").textContent = `User: ${input}`;
-};
-
-window.changeUser = function () {
-  localStorage.removeItem("userName");
-  location.reload();
-};
-
-async function withLoading(fn, index) {
-  const buttons = document.querySelectorAll(`button[onclick^="deleteRecord"]`);
-  const button = buttons[index];
-  const originalText = button.innerHTML;
-  button.innerHTML = '⌛ Deleting...';
-  button.disabled = true;
+// 1. Verificação Inicial de Cache
+async function checkCache() {
+  const lastVersion = localStorage.getItem('appVersion');
   
-  try {
-    await fn(index);
-  } finally {
-    button.innerHTML = originalText;
-    button.disabled = false;
+  if (lastVersion !== APP_VERSION) {
+    console.log(`Atualizando cache da versão ${lastVersion || 'desconhecida'} para ${APP_VERSION}`);
+    await clearProblematicCache();
+    localStorage.setItem('appVersion', APP_VERSION);
   }
 }
 
-window.deleteRecord = async function (index) {
-  const record = records[index];
-  
-  if (!record) {
-    alert("Record not found!");
-    return;
-  }
-
+// 2. Limpeza Segura de Cache
+async function clearProblematicCache() {
   try {
-    if (record.id) {
-      await deleteDoc(doc(db, "registros", record.id));
-    }
+    // Limpa apenas o cache problemático, mantendo os registros
+    const recordsBackup = localStorage.getItem("records");
+    const userNameBackup = localStorage.getItem("userName");
     
-    records.splice(index, 1);
-    localStorage.setItem("records", JSON.stringify(records));
-    showRecords();
+    // Limpeza seletiva
+    localStorage.removeItem("appVersion");
+    caches.keys().then(names => names.forEach(name => caches.delete(name)));
     
-  } catch (err) {
-    console.error("Error deleting record:", err);
-    alert(`Failed to delete record: ${err.message}`);
+    // Restaura os dados importantes
+    if (recordsBackup) localStorage.setItem("records", recordsBackup);
+    if (userNameBackup) localStorage.setItem("userName", userNameBackup);
     
+    console.log("Cache limpo com segurança");
+  } catch (error) {
+    console.error("Erro ao limpar cache:", error);
+  }
+}
+
+// 3. Função para Forçar Atualização
+window.forceRefresh = async function() {
+  if (confirm("⚠️ Isso irá:\n\n1. Limpar o cache do navegador\n2. Recarregar todos os dados do Firebase\n\nDados existentes NÃO serão perdidos.\n\nContinuar?")) {
     try {
-      const querySnapshot = await getDocs(collection(db, "registros"));
-      const freshRecords = [];
+      // Mostra feedback visual
+      const btn = event.target;
+      btn.innerHTML = "⌛ Processando...";
+      btn.disabled = true;
       
-      querySnapshot.forEach((doc) => {
-        freshRecords.push({ ...doc.data(), id: doc.id });
-      });
+      // Executa a limpeza
+      await clearProblematicCache();
       
-      records = freshRecords;
-      localStorage.setItem("records", JSON.stringify(freshRecords));
-      showRecords();
+      // Sincroniza com Firestore
+      await syncWithFirestore();
       
-    } catch (syncError) {
-      console.error("Sync failed:", syncError);
-      alert("Could not sync with server. Please refresh the page.");
+      alert("✅ Atualização concluída!\nO app será recarregado.");
+      setTimeout(() => location.reload(), 1000);
+    } catch (error) {
+      console.error("Erro na atualização:", error);
+      alert(`❌ Erro: ${error.message}`);
+      event.target.innerHTML = "🔄 Forçar Atualização";
+      event.target.disabled = false;
     }
   }
 };
 
-window.addRecord = async function () {
-  const dateStr = document.getElementById("date").value;
-  const role = document.getElementById("role").value;
-  const location = document.getElementById("location").value;
-  const hours = parseFloat(document.getElementById("hours").value);
-  const name = localStorage.getItem("userName");
-
-  if (!dateStr || !role || !location || isNaN(hours) || !name) {
-    alert("Please complete all fields correctly.");
-    return;
-  }
-
-  const date = new Date(dateStr);
-  const day = date.getDate();
-  const rate = rates[role];
-
+// 4. Sincronização Segura com Firestore
+async function syncWithFirestore() {
   try {
-    const docRef = await addDoc(collection(db, "registros"), {
-      name,
-      date: dateStr,
-      day,
-      role,
-      location,
-      hours,
-      rate,
-      sentAt: new Date().toISOString()
+    const querySnapshot = await getDocs(collection(db, "registros"));
+    const firestoreRecords = [];
+    
+    querySnapshot.forEach(doc => {
+      firestoreRecords.push({ ...doc.data(), id: doc.id });
     });
 
-    records.push({ date: dateStr, role, location, hours, rate, day, id: docRef.id });
-    localStorage.setItem("records", JSON.stringify(records));
-    showRecords();
+    // Mescla registros existentes com os do Firestore
+    const localRecords = JSON.parse(localStorage.getItem("records") || [];
+    const mergedRecords = [...localRecords];
     
-    document.getElementById("date").value = "";
-    document.getElementById("role").value = "";
-    document.getElementById("location").value = "";
-    document.getElementById("hours").value = "";
-
-  } catch (err) {
-    console.error("Error saving data:", {
-      code: err.code,
-      message: err.message,
-      stack: err.stack
+    firestoreRecords.forEach(fr => {
+      if (!mergedRecords.some(lr => lr.id === fr.id)) {
+        mergedRecords.push(fr);
+      }
     });
-    
-    alert(`Failed to save data:\n\nCode: ${err.code}\n\nMessage: ${err.message}`);
-    
-    document.getElementById("date").value = dateStr;
-    document.getElementById("role").value = role;
-    document.getElementById("location").value = location;
-    document.getElementById("hours").value = hours;
+
+    // Atualiza apenas se houver diferenças
+    if (mergedRecords.length !== localRecords.length) {
+      localStorage.setItem("records", JSON.stringify(mergedRecords));
+      records = mergedRecords;
+      showRecords();
+      console.log(`Sincronizados ${mergedRecords.length - localRecords.length} novos registros`);
+    }
+  } catch (error) {
+    console.error("Erro na sincronização:", error);
+    throw new Error("Falha ao sincronizar com o servidor");
   }
-};
-
-function showRecords() {
-  const div = document.getElementById("recordList");
-  div.innerHTML = "";
-
-  records.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach((r, index) => {
-    const icon = r.role.includes("Supervisor") ? "💼" : "🧹";
-    const item = document.createElement("div");
-    item.className = "registro";
-    item.innerHTML = `
-      <div><strong>${r.date}</strong><br>
-      📍 ${r.location} | ${icon} ${r.role} | ⏱️ ${r.hours}h</div>
-      <button onclick="withLoading(deleteRecord, ${index})">Delete</button>
-    `;
-    div.appendChild(item);
-  });
 }
 
-window.generateReport = function () {
-  const p = document.getElementById("period").value;
-  if (!p) {
-    alert("Please select a period.");
-    return;
+// 5. Inicialização Segura
+async function initializeApp() {
+  await checkCache();
+  
+  // Verifica dados corrompidos
+  try {
+    JSON.parse(localStorage.getItem("records"));
+  } catch {
+    localStorage.removeItem("records");
+    console.warn("Dados locais corrompidos - Resetados");
   }
-
-  let start = 1, end = 31, label = "Full Month (1-31)";
-  if (p === "1") { start = 1; end = 15; label = "1st Half (1-15)"; }
-  else if (p === "2") { start = 16; end = 31; label = "2nd Half (16-31)"; }
-
-  const filtered = records.filter(r => r.day >= start && r.day <= end);
-  if (filtered.length === 0) {
-    alert("No records in this period.");
-    return;
+  
+  // Carrega dados
+  const userName = localStorage.getItem("userName");
+  if (!userName) {
+    document.getElementById("nameModal").style.display = "flex";
+  } else {
+    document.getElementById("userDisplay").textContent = `User: ${userName}`;
   }
+  
+  // Sincroniza com Firestore
+  await syncWithFirestore();
+  showRecords();
+}
 
-  let table = `<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;text-align:left;">
-    <tr><th>Date</th><th>Location</th><th>Role</th><th>Hours</th></tr>`;
+// [Seu código restante aqui...]
 
-  filtered.forEach(r => {
-    const [year, month, day] = r.date.split("-");
-    table += `<tr>
-      <td>${day}/${month}/${year}</td>
-      <td>${r.location}</td>
-      <td>${r.role}</td>
-      <td>${r.hours}</td>
-    </tr>`;
-  });
-
-  table += `</table>`;
-
-  let summary = {}, total = 0;
-  filtered.forEach(r => {
-    if (!summary[r.role]) summary[r.role] = { hours: 0, total: 0, rate: r.rate };
-    summary[r.role].hours += r.hours;
-    summary[r.role].total += r.hours * r.rate;
-    total += r.hours * r.rate;
-  });
-
-  let summaryHtml = `<br><b>Summary by Role:</b><br>`;
-  for (let role in summary) {
-    const s = summary[role];
-    summaryHtml += `${role}: ${s.hours}h x €${s.rate.toFixed(2)} = €${s.total.toFixed(2)}<br>`;
-  }
-  summaryHtml += `<br><span style="background: yellow; font-weight: bold;">Total: €${total.toFixed(2)}</span>`;
-
-  const finalReport = `Payment Report - ${label}<br><br>${table}${summaryHtml}`;
-
-  document.getElementById("report").innerHTML = finalReport;
-  document.getElementById("report").style.display = "block";
-  document.getElementById("btnSend").style.display = "inline-block";
-};
-
-window.sendEmail = function () {
-  const name = localStorage.getItem("userName");
-  const filtered = records;
-  const monthName = new Date(filtered[0].date).toLocaleString('default', { month: 'long' });
-  const label = document.getElementById("period").selectedOptions[0].text;
-
-  const reportLines = [];
-  reportLines.push(`Payment Report – ${label}`);
-  reportLines.push("----------------------------------\n");
-  reportLines.push("Worked Days:");
-
-  filtered.forEach(r => {
-    const [year, month, day] = r.date.split("-");
-    reportLines.push(`${day}/${month}/${year} | ${r.location} | ${r.role} | ${r.hours} hours`);
-  });
-
-  reportLines.push("\n----------------------------------\n");
-  reportLines.push("Summary by Role:");
-
-  let summary = {}, total = 0;
-  filtered.forEach(r => {
-    if (!summary[r.role]) summary[r.role] = { hours: 0, total: 0, rate: r.rate };
-    summary[r.role].hours += r.hours;
-    summary[r.role].total += r.hours * r.rate;
-    total += r.hours * r.rate;
-  });
-
-  for (let role in summary) {
-    const s = summary[role];
-    reportLines.push(`${role}: ${s.hours}h x €${s.rate.toFixed(2)} = €${s.total.toFixed(2)}`);
-  }
-
-  reportLines.push("\n----------------------------------\n");
-  reportLines.push(`Total: €${total.toFixed(2)}`);
-
-  const subject = encodeURIComponent(`Payment Request ${monthName}: ${name}`);
-  const body = encodeURIComponent(reportLines.join("\n"));
-  const mailto = `mailto:fabiana@marvelcleaningservices.ie?subject=${subject}&body=${body}`;
-  window.location.href = mailto;
-
-  localStorage.removeItem("userName");
-  localStorage.removeItem("records");
-  setTimeout(() => location.reload(), 1000);
-};
-
-showRecords();
-
-document.querySelectorAll('input, select').forEach(el => {
-  el.addEventListener('blur', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+// Inicializa o app
+initializeApp().catch(error => {
+  console.error("Falha na inicialização:", error);
+  alert(`Erro crítico: ${error.message}\n\nTente limpar o cache manualmente.`);
 });
 
 </script>
